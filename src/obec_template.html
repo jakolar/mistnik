@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Místník – __TOWN__ 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --paper: #f5f6f4; --ink: #17202a; --muted: #5a626d; --rule: #d7dad8; --grid: #e8eae7; --accent: #424b00; --hover: #ebede6;
+  --serif: "Literata", Georgia, serif; --sans: "Public Sans", system-ui, sans-serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --grid: #23272e; --accent: #b3c075; --hover: #1e2228; } }
+:root[data-theme="dark"] { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --grid: #23272e; --accent: #b3c075; --hover: #1e2228; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--sans); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.top { border-bottom: 1px solid var(--rule); }
+.top div { max-width: none; margin: 0 auto; padding: 14px 16px; display: flex; align-items: baseline; gap: 16px; }
+.wm { font: 800 1.6rem/1 var(--serif); letter-spacing: -.02em; color: var(--ink); text-decoration: none; display: inline-flex; }
+.wm .i { position: relative; } .wm .i::after { content: ""; position: absolute; left: 50%; bottom: .8em; width: .13em; height: .4em;
+  background: var(--ink); transform: translateX(-30%) rotate(32deg); transform-origin: bottom center; }
+.top small { color: var(--muted); }
+main { max-width: none; margin: 0 auto; padding: 24px clamp(16px, 2.5vw, 48px) 80px; }
+h1 { font: 600 clamp(2rem, 5vw, 3rem)/1.1 var(--serif); margin: 4px 0 4px; }
+.kicker { color: var(--muted); margin: 0; }
+.council { margin: 20px 0 8px; padding: 14px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); display: flex; flex-wrap: wrap; gap: 8px 32px; }
+.council b { font: 600 1.4rem var(--serif); font-variant-numeric: tabular-nums; margin-right: 6px; }
+.council details { flex-basis: 100%; font-size: .9rem; color: var(--muted); }
+.council summary { cursor: pointer; color: var(--accent); width: fit-content; }
+.tabs { display: none; gap: 6px; overflow-x: auto; padding: 12px 0; position: sticky; top: 0; background: var(--paper); z-index: 2; border-bottom: 1px solid var(--rule); }
+.tabs button { font: 500 .85rem var(--sans); white-space: nowrap; border: 1px solid var(--rule); background: var(--paper); color: var(--ink);
+  border-radius: 999px; padding: 6px 12px; min-height: 36px; cursor: pointer; }
+.tabs button[aria-selected="true"] { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.lists { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(340px, 380px); gap: 28px; margin-top: 24px; align-items: start;
+  overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 12px; overscroll-behavior-x: contain; }
+.lists > .list { scroll-snap-align: start; }
+.scrollhint { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; font-size: .85rem; color: var(--muted); }
+.scrollhint button { font: inherit; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: 4px; padding: 4px 12px; cursor: pointer; min-height: 32px; }
+.list { border-top: 3px solid var(--ink); }
+.list header { padding: 10px 0 8px; }
+.list .no { font: 600 .85rem var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; }
+.list h2 { font: 600 1.2rem/1.25 var(--serif); margin: 2px 0 6px; }
+.stats { font-size: .875rem; color: var(--muted); margin: 0; }
+.hl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0 0; font-size: .875rem; }
+.hl button { font: inherit; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 6px 12px; min-height: 36px; cursor: pointer; }
+.hl button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+#hlcount { color: var(--muted); }
+.row.dim { opacity: .3; }
+#flow { margin: 16px 0 0; border-top: 1px solid var(--rule); padding-top: 12px; }
+#flow h3 { font: 600 1rem var(--sans); margin: 0 0 4px; }
+#flow svg text { font: 13px var(--sans); fill: var(--ink); }
+#flow h3 { margin-top: 20px; }
+.ftw { overflow-x: auto; }
+.ft { border-collapse: collapse; font-size: .9rem; width: 100%; max-width: 1100px; }
+.ft th, .ft td { text-align: left; vertical-align: top; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule); }
+.ft thead th { font-weight: 600; color: var(--muted); font-size: .8rem; }
+.ft tbody th { font-weight: 500; min-width: 180px; }
+.ft td.n { font-variant-numeric: tabular-nums; min-width: 70px; }
+.ft .src { color: var(--muted); font-size: .8rem; min-width: 200px; margin-top: 2px; }
+.mv { display: none; font-size: .8rem; margin-top: 2px; }
+body.moves .mv { display: block; }
+.mv.moved { font-weight: 600; }
+.mv.stay { color: var(--muted); }
+.kf { display: grid; grid-template-columns: auto 1.4fr 1fr; gap: 14px; margin: 6px 0 10px; }
+.kf b { display: block; font: 600 1.6rem/1.1 var(--serif); font-variant-numeric: tabular-nums; }
+.kf span { display: block; font-size: .78rem; color: var(--muted); line-height: 1.3; }
+.stats b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ages { display: flex; height: 8px; gap: 2px; margin: 8px 0 4px; }
+.ages i { background: var(--muted); opacity: .55; border-radius: 1px; }
+.ages i:nth-child(2) { opacity: .7; } .ages i:nth-child(3) { opacity: .85; } .ages i:nth-child(4) { opacity: 1; }
+.ageleg { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.row { display: grid; grid-template-columns: 1.8rem 1fr 1rem; gap: 0 10px; padding: 10px 4px 10px 0; border-top: 1px solid var(--grid); cursor: pointer;
+  background: none; border-left: 0; border-right: 0; border-bottom: 0; width: 100%; text-align: left; font: inherit; color: inherit; }
+.row:hover { background: var(--hover); }
+.pos { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.nm { font: 600 1rem var(--serif); }
+.who { font-size: .85rem; color: var(--muted); display: block; }
+.hist { font-size: .85rem; display: block; margin-top: 2px; }
+.new { color: var(--muted); font-style: italic; }
+.badge.won { background: var(--ink); color: var(--paper); font-weight: 600; }
+.badge.vet { color: var(--muted); border-color: var(--muted); }
+.badge.newb { border-style: dashed; color: var(--muted); border-color: var(--muted); }
+.badge { font-size: .75rem; border: 1px solid var(--ink); border-radius: 999px; padding: 0 6px; margin-left: 6px; white-space: nowrap; }
+.go { color: var(--muted); align-self: center; }
+.dots { display: inline-flex; gap: 4px; vertical-align: middle; margin-right: 6px; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--ink); display: inline-block; }
+.dots i.won { background: var(--ink); } .dots i.none { border-color: var(--rule); border-style: dotted; }
+.more { margin: 6px 0 0; font: 500 .9rem var(--sans); background: none; border: 0; color: var(--accent); cursor: pointer; padding: 6px 0; }
+.nk { margin-top: 40px; }
+.nk h2 { font: 600 1.2rem var(--serif); border-top: 3px solid var(--ink); padding-top: 10px; }
+.legend { font-size: .8rem; color: var(--muted); margin-top: 28px; }
+dialog { border: 0; padding: 0; max-width: 760px; width: calc(100% - 24px); background: var(--paper); color: var(--ink); border-radius: 6px; }
+dialog::backdrop { background: rgba(10, 12, 16, .45); }
+.prof { padding: 22px 22px 28px; }
+.prof .close { float: right; font: inherit; border: 1px solid var(--rule); background: none; color: var(--ink); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.prof h2 { font: 600 1.8rem/1.15 var(--serif); margin: 0 0 4px; }
+.prof .sub { color: var(--muted); margin: 0 0 16px; }
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 0 0 16px; }
+.figs b { display: block; font: 600 1.5rem var(--serif); font-variant-numeric: tabular-nums; }
+.figs span { color: var(--muted); font-size: .8rem; }
+.prof h3 { font: 600 .95rem var(--sans); margin: 20px 0 6px; }
+table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+th, td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+td.n { font-variant-numeric: tabular-nums; text-align: right; }
+.why { list-style: none; padding: 0; margin: 0; font-size: .85rem; }
+.why li { display: grid; grid-template-columns: 4rem 1fr; gap: 8px; padding: 3px 0; }
+.maybe { background: var(--hover); border-radius: 4px; padding: 10px 12px; font-size: .85rem; margin-top: 12px; }
+.maybe p { margin: 0 0 4px; }
+.note { font-size: .85rem; color: var(--muted); }
+.report { display: inline-block; text-decoration: none; margin-top: 14px; font: inherit; font-size: .85rem; border: 1px solid var(--rule); background: none; color: var(--ink); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+footer { max-width: none; margin: 0 auto; padding: 16px; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--rule); }
+@media (max-width: 720px) {
+  .tabs { display: flex; }
+  .lists { display: block; overflow: visible; }
+  .scrollhint { display: none !important; }
+  .list, .nk { display: none; }
+  .list.on, .nk.on { display: block; }
+  td.opt, th.opt { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="top"><div><a class="wm" href="../index.html">M<span class="i">ı</span>stník</a><small>Kdo kandiduje. A kdo kandidoval.</small>
+  <nav style="margin-left:auto;display:flex;gap:16px;font-size:.9rem"><a href="../index.html">Obce</a><a href="../povolani.html">Povolání</a><a href="../metodika.html">Jak to počítáme</a></nav></div></div>
+<main>
+  <p class="kicker">Komunální volby 2026</p>
+  <h1>__TOWN__</h1>
+  <section class="council" id="council"></section>
+  <p class="legend" style="margin:12px 0 0"><span class="dots" aria-hidden="true"><i class="won"></i><i></i><i class="none"></i></span>Tečky = volby 2002 až 2026: plná zvolen, prázdná kandidoval, tečkovaná nekandidoval.</p>
+  <div class="hl" role="radiogroup" aria-label="Zvýraznit kandidáty">
+    <span>Zvýraznit:</span>
+    <button type="button" data-hl="" aria-pressed="true">Všichni</button>
+    <button type="button" data-hl="new" aria-pressed="false">Poprvé v obci</button>
+    <button type="button" data-hl="again" aria-pressed="false">Kandidují znovu</button>
+    <button type="button" data-hl="won22" aria-pressed="false">Zvolení 2022</button>
+    <button type="button" data-hl="vet" aria-pressed="false">Dlouholetí kandidáti</button>
+    <button type="button" id="movesBtn" aria-pressed="false">Přesuny od 2022</button>
+    <span id="hlcount"></span>
+  </div>
+  <section id="flow" hidden></section>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Kandidátky"></nav>
+  <div class="scrollhint" id="hint" hidden><span>Kandidátky jsou vedle sebe, posouvejte do strany.</span>
+    <span><button type="button" id="prev" aria-label="Předchozí kandidátky">←</button> <button type="button" id="next" aria-label="Další kandidátky">→</button></span></div>
+  <div class="lists" id="lists" tabindex="0" aria-label="Kandidátky, posouvejte do strany"></div>
+  <section class="nk" id="nk"></section>
+  <p class="legend">Tečky u kandidáta: volby 2002, 2006, 2010, 2014, 2018, 2022 a 2026. Plná tečka zvolen, prázdná kandidoval, tečkovaná nekandidoval. Historie zahrnuje jen spojení, která jsou podle nás jistá.</p>
+</main>
+<footer>Zdroj: Český statistický úřad, kandidátní listiny 2002–2026 (registr k 7. 10. 2026), licence ČSÚ. Historie kandidatur je odvozená naším párováním a může obsahovat chyby, <a href="../metodika.html">jak to počítáme</a>. Chyba nebo námitka: <a href="mailto:__CONTACT__">__CONTACT__</a>. Místník připravil Jan Antonín Kolář.</footer>
+<dialog id="prof"><div class="prof" id="profBody"></div></dialog>
+<script>
+const people = __DATA__;
+const meta = __META__;
+const YEARS = ["2002", "2006", "2010", "2014", "2018", "2022", "2026"];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const f = (p, m, z) => p.female ? z : m;
+const num = x => x.toLocaleString("cs-CZ");
+const SHOW = 12;
+const VETERAN = 4;  // at least four earlier candidacies, i.e. 16+ years in local politics
+const pl = (n, one, few, many) => `${n} ${n === 1 ? one : n >= 2 && n <= 4 ? few : many}`;
+
+function dots(p) {
+  const by = Object.fromEntries(p.history.map(h => [h.year, h]));
+  return `<span class="dots" aria-hidden="true">${YEARS.map(y => { const h = by[y];
+    return `<i class="${!h ? "none" : y !== "2026" && h.elected ? "won" : ""}"></i>`; }).join("")}</span>`;
+}
+function affil(p) { return p.member ? `${f(p, "člen", "členka")} ${esc(p.party)}` : "bez politické příslušnosti"; }
+function runs(p) {
+  const out = [];
+  for (const h of p.history) { const l = out.at(-1);
+    if (l && l.lid === (h.lid || h.list)) l.to = h.year; else out.push({list: h.list, lid: h.lid || h.list, from: h.year, to: h.year}); }
+  return out;
+}
+function histLine(p) {
+  if (!p.ran && p.namesake) return `<span class="new">V obci dříve kandidoval jmenovec podobného věku, jako stejného člověka jsme ho nepotvrdili</span>`;
+  if (!p.ran) return p.rare ? `<span class="new">Dřívější kandidaturu v této obci od roku 2002 jsme nenašli</span>`
+                            : "";
+  const r = runs(p), same = r.length === 1;
+  const last = p.history.filter(h => h.year !== "2026").at(-1).year;
+  const gap = last !== "2022" ? `, naposledy v roce ${last}` : "";  // returning after a break
+  const base = `${f(p, "Kandidoval", "Kandidovala")} dříve ${p.ran}×` + (p.elected ? `, ${f(p, "zvolen", "zvolena")} ${p.elected}×` : "") + gap;
+  if (same) return `${dots(p)}${base}, vždy za stejnou kandidátku`;
+  const prev = r.at(-2);
+  return `${dots(p)}${base}, dříve za ${esc(prev.list)}`;
+}
+
+function prev22(p) { return p.history.find(h => h.year === "2022"); }
+// where the candidate stood in 2022 in this council: {kind: new|break|elsewhere|stay|moved, list}
+function move22(p) {
+  const h = prev22(p);
+  if (!h) return {kind: p.ran ? "break" : "new"};
+  const here = h.here;
+  if (!here) return {kind: "elsewhere", town: h.town};
+  const now = p.history.at(-1);
+  const same = (here.lid || here.list) === (now.lid || p.list) || (here.parties || []).some(x => (now.parties || []).includes(x));  // renamed list of the same party
+  return {kind: same ? "stay" : "moved", list: here.list};
+}
+function moveLine(p) {
+  const m = move22(p), a = p.female ? "a" : "";
+  return m.kind === "new" ? `<span class="mv stay">nový</span>`
+    : m.kind === "break" ? `<span class="mv stay">v roce 2022 nekandidoval${a}</span>`
+    : m.kind === "elsewhere" ? `<span class="mv stay">v roce 2022 kandidoval${a} jinde (${esc(m.town)})</span>`
+    : m.kind === "stay" ? `<span class="mv stay">zůstal${a} u kandidátky ${esc(m.list)}</span>`
+    : `<span class="mv moved">→ přešel${a} z kandidátky ${esc(m.list)}</span>`;
+}
+function row(p) {
+  const veteran = p.ran >= VETERAN;
+  const badge = (p.incumbent ? `<span class="badge won">${f(p, "zvolen", "zvolena")} 2022</span>` : "")
+    + (veteran ? `<span class="badge vet" title="Dříve kandidoval${p.female ? "a" : ""} ${p.ran}×, poprvé v roce ${p.since}">kandiduje od ${p.since}</span>` : "")
+    + (p.ran === 0 && !p.namesake ? `<span class="badge newb" title="Dřívější kandidaturu v této obci od roku 2002 jsme nenašli">${f(p, "nováček", "nováček")} v obci</span>` : "");
+  const kind = p.ran === 0 && !p.namesake ? "new" : p.ran > 0 ? "again" : "unsure";
+  return `<button class="row" type="button" data-id="${esc(p.id)}" data-kind="${kind}" data-won22="${p.incumbent ? 1 : 0}" data-vet="${p.ran >= VETERAN ? 1 : 0}"><span class="pos">${p.pos}.</span><span>
+    <span class="nm">${esc(p.name)}</span>, ${p.age}${badge}
+    <span class="who">${esc(p.occ)}, ${affil(p)}</span>
+    ${histLine(p) ? `<span class="hist">${histLine(p)}</span>` : ""}${moveLine(p)}</span><span class="go" aria-hidden="true">›</span></button>`;
+}
+
+function listStats(ps, no) {
+  const st = meta.ages[String(no)];
+  const sorted = ps.map(p => p.age).sort((a, b) => a - b);
+  const med = st ? st[0] : sorted[Math.floor((sorted.length - 1) / 2)];
+  const younger = st ? Math.round(st[1] * 100) : null;
+  const ageNote = younger == null ? "" : younger >= 50 ? `mladší než ${younger} % kandidátek v ČR` : `starší než ${100 - younger} % kandidátek v ČR`;
+  const b = [0, 0, 0, 0]; ps.forEach(p => b[p.age < 30 ? 0 : p.age < 45 ? 1 : p.age < 60 ? 2 : 3]++);
+  const prior = ps.filter(p => p.ran > 0).length, w = ps.filter(p => p.gender === "Z").length, m = ps.filter(p => p.gender === "M").length;
+  const unk = ps.length - w - m;
+  return `<div class="kf"><div><b>${ps.length}</b><span>${ps.length === 1 ? "kandidát" : ps.length <= 4 ? "kandidáti" : "kandidátů"}</span></div>
+      <div><b>${String(med).replace(".", ",")}</b><span>medián věku${ageNote ? `<br>${ageNote}` : ""}</span></div>
+      <div><b>${w}/${m}</b><span>žen/mužů${unk ? `, ${unk} nezjištěno` : ""}</span></div></div>
+    <div class="ages" title="Věkové složení">${b.map(x => `<i style="flex:${x}"></i>`).join("")}</div>
+    <div class="ageleg"><span>do 30: ${b[0]}</span><span>30–44: ${b[1]}</span><span>45–59: ${b[2]}</span><span>60+: ${b[3]}</span></div>
+    <p class="stats">${prior} ${prior === 1 ? "kandidoval" : prior >= 2 && prior <= 4 ? "kandidovali" : "kandidovalo"} dříve, ${ps.length - prior} bez doložené dřívější kandidatury</p>`;
+}
+
+const groups = new Map();
+people.forEach(p => groups.set(p.list_no, [...(groups.get(p.list_no) || []), p]));
+const full = [...groups].filter(([, ps]) => ps.length > 1), solo = [...groups].filter(([, ps]) => ps.length === 1).map(([, ps]) => ps[0]);
+
+document.getElementById("council").innerHTML = `<span>${pl(full.length + solo.length, "kandidátka", "kandidátky", "kandidátek").replace(/^(\d+)/, "<b>$1</b>")}</span>
+  <span>${pl(people.length, "kandidát", "kandidáti", "kandidátů").replace(/^(\d+)/, "<b>$1</b>")}</span>
+  <span><b>${meta.running}</b>z ${meta.elected22} zvolených v roce 2022 kandiduje znovu</span>
+  ${meta.leaving.length ? `<details><summary>Kdo ze zvolených 2022 tu nekandiduje</summary><p>${meta.leaving.map(l => esc(l.name) + (l.elsewhere ? ` (kandiduje v obci ${esc(l.elsewhere)})` : "")).join(", ")}</p>
+  <p>Počítáno ze zvolených ve volbách 2022, změny během období (rezignace, náhradníci) data nezachycují.</p></details>` : ""}`;
+
+document.getElementById("lists").innerHTML = full.map(([no, ps]) => `<section class="list" id="l${no}" data-no="${no}">
+  <header><span class="no">Kandidátka č. ${no}</span><h2>${esc(ps[0].list)}</h2>${listStats(ps, no)}</header>
+  ${ps.map((p, i) => i < SHOW ? row(p) : row(p).replace('class="row"', 'class="row" hidden')).join("")}
+  ${ps.length > SHOW ? `<button class="more" type="button">Zobrazit všech ${ps.length}</button>` : ""}</section>`).join("");
+document.getElementById("nk").innerHTML = solo.length ? `<h2>Kandidátky s jediným kandidátem</h2><p class="stats">Nezávislí kandidáti a strany s jedním kandidátem. Číslo kandidátky je u jména.</p>
+  ${solo.map(p => row({...p, pos: p.list_no})).join("")}` : "";
+
+const listsEl = document.getElementById("lists"), hint = document.getElementById("hint");
+const step = () => (listsEl.querySelector(".list")?.offsetWidth || 360) + 28;
+document.getElementById("prev").onclick = () => listsEl.scrollBy({left: -step(), behavior: "smooth"});
+document.getElementById("next").onclick = () => listsEl.scrollBy({left: step(), behavior: "smooth"});
+const fit = () => { hint.hidden = listsEl.scrollWidth <= listsEl.clientWidth + 4; };
+window.addEventListener("resize", fit); setTimeout(fit, 0);
+document.querySelector(".hl").addEventListener("click", e => {
+  const b = e.target.closest("button[data-hl]"); if (!b) return;
+  const k = b.dataset.hl;
+  document.querySelectorAll(".hl button[data-hl]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  let n = 0;
+  document.querySelectorAll(".row").forEach(r => {
+    const hit = !k || (k === "won22" ? r.dataset.won22 === "1" : k === "vet" ? r.dataset.vet === "1" : r.dataset.kind === k);
+    r.classList.toggle("dim", !hit); if (hit && k) n++;
+    if (hit && k && r.hidden) r.hidden = false;  // a highlighted candidate must not stay in a collapsed list
+  });
+  document.getElementById("hlcount").textContent = k ? `${n} z ${people.length}` : "";
+});
+// numbers behind the diagram, unfolded: where each 2026 list's people stood in 2022, and where each 2022 list's people went
+function moveTables() {
+  const inc = (o, k, n = 1) => (o[k] = (o[k] || 0) + n, o);
+  const to = new Map(), from = new Map();
+  for (const p of people) {
+    const m = move22(p), t = to.get(p.list) || {stay: 0, moved: 0, src: {}, elsewhere: 0, break: 0, new: 0, n: 0};
+    t.n++; m.kind === "moved" ? (t.moved++, inc(t.src, m.list)) : t[m.kind]++;
+    to.set(p.list, t);
+    if (m.list) { const f = from.get(m.list) || {stay: 0, moved: 0, dst: {}, out: 0}; m.kind === "stay" ? f.stay++ : (f.moved++, inc(f.dst, p.list)); from.set(m.list, f); }
+  }
+  for (const l of meta.leaving || []) { const f = from.get(l.list) || {stay: 0, moved: 0, dst: {}, out: 0}; f.out++; from.set(l.list, f); }
+  const det = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${esc(k)} ${n}`).join(", ");
+  const c = (n, d) => `<td class="n">${n || "–"}${n && d ? `<div class="src">${d}</div>` : ""}</td>`;
+  const a = [...to].map(([k, t]) => `<tr><th>${esc(k)}</th>${c(t.stay)}${c(t.moved, det(t.src))}${c(t.elsewhere)}${c(t.break)}${c(t.new)}<td class="n"><b>${t.n}</b></td></tr>`).join("");
+  const b = [...from].sort((x, y) => (y[1].stay + y[1].moved) - (x[1].stay + x[1].moved))
+    .map(([k, f]) => `<tr><th>${esc(k)}</th>${c(f.stay)}${c(f.moved, det(f.dst))}${c(f.out)}</tr>`).join("");
+  return `<h3>Odkud přišli kandidáti 2026</h3>
+    <div class="ftw"><table class="ft"><thead><tr><th>kandidátka 2026</th><th>zůstali</th><th>přešli z jiné</th><th>2022 jinde</th><th>dříve, ne 2022</th><th>noví</th><th>celkem</th></tr></thead><tbody>${a}</tbody></table></div>
+    <h3>Kam šli kandidáti z roku 2022</h3>
+    <div class="ftw"><table class="ft"><thead><tr><th>kandidátka 2022</th><th>zůstali</th><th>přešli jinam</th><th>zvolení, už nekandidují</th></tr></thead><tbody>${b}</tbody></table></div>
+    <p class="stats">Počítáme jen lidi, kteří kandidují v roce 2026, a zvolené z roku 2022. O nezvolených kandidátech 2022, kteří už nekandidují, údaj neuvádíme.</p>`;
+}
+function flowSvg() {
+  const links = new Map(), L = new Map(), R = new Map();
+  const add = (m, k, n) => m.set(k, (m.get(k) || 0) + n);
+  const GROUP = {new: "noví", break: "kandidovali dříve, ne 2022", elsewhere: "v roce 2022 jinde"}, OUT = "zvolení 2022, už nekandidují";
+  const flows = people.map(p => { const m = move22(p); return [m.list || GROUP[m.kind], p.list, m.kind === "moved"]; })
+    .concat((meta.leaving || []).map(l => [l.list, OUT, false]));
+  // ponytail: big cities have 20+ lists a side; fold the smallest into "ostatní" so labels stay readable
+  const MAXN = 12, OTHER = "ostatní kandidátky", fold = side => {
+    const n = new Map(); flows.forEach(f => n.set(f[side], (n.get(f[side]) || 0) + 1));
+    const fixed = new Set([...Object.values(GROUP), OUT]);
+    const keep = new Set([...n].filter(([k]) => !fixed.has(k)).sort((a, b) => b[1] - a[1]).slice(0, MAXN).map(([k]) => k));
+    flows.forEach(f => { if (!fixed.has(f[side]) && !keep.has(f[side])) f[side] = OTHER; }); };
+  const tables = moveTables();
+  fold(0);  // the right side is this page's own lists: always all of them
+  const movedPair = new Set();
+  for (const [a, b, mv] of flows) { if (mv) movedPair.add(a + "\u0000" + b); add(links, a + "\u0000" + b, 1); add(L, a, 1); add(R, b, 1); }
+  const W = 1000, H = Math.max(160, 24 * Math.max(L.size, R.size) + 40), total = [...L.values()].reduce((a, b) => a + b, 0);
+  const gap = 6, scale = (H - 20 - gap * Math.max(L.size, R.size)) / total;
+  const last = [OTHER, GROUP.break, GROUP.elsewhere, GROUP.new, OUT];  // groups below the real lists
+  const rank = k => last.indexOf(k);
+  const place = m => { let y = 10; const o = new Map();
+    for (const [k, n] of [...m].sort((a, b) => rank(a[0]) - rank(b[0]) || b[1] - a[1])) { o.set(k, {y, h: n * scale, used: 0}); y += Math.max(n * scale, 12) + gap; }
+    return o; };
+  const lp = place(L), rp = place(R), x0 = 280, x1 = W - 280;
+  const bottom = o => Math.max(...[...o.values()].map(v => v.y + Math.max(v.h, 12)));
+  const HH = Math.max(bottom(lp), bottom(rp)) + 10;
+  let bands = "";
+  for (const [k, n] of [...links].sort((a, b) => b[1] - a[1])) {
+    const [a, b] = k.split("\u0000"), A = lp.get(a), B = rp.get(b), h = n * scale;
+    const ya = A.y + A.used, yb = B.y + B.used; A.used += h; B.used += h;
+    const moved = movedPair.has(k);
+    bands += `<path d="M${x0},${ya + h / 2} C${(x0 + x1) / 2},${ya + h / 2} ${(x0 + x1) / 2},${yb + h / 2} ${x1},${yb + h / 2}" stroke="var(--ink)" stroke-opacity="${moved ? .55 : .15}" stroke-width="${Math.max(h, 1)}" fill="none"><title>${esc(a)} → ${esc(b)}: ${n}</title></path>`;
+  }
+  const lab = (o, x, anchor) => [...o].map(([k, v]) => `<rect x="${anchor === "end" ? x - 4 : x}" y="${v.y}" width="4" height="${Math.max(v.h, 1)}" fill="var(--ink)"/>
+    <text x="${anchor === "end" ? x - 8 : x + 8}" y="${v.y + v.h / 2 + 4}" text-anchor="${anchor}"><title>${esc(k)}: ${num(v.h / scale)}</title>${esc(k.length > 32 ? k.slice(0, 31) + "…" : k)} <tspan style="fill:var(--muted)">${Math.round(v.h / scale)}</tspan></text>`).join("");
+
+  return `<h3>Odkud kandidáti přišli</h3><p class="stats">Vlevo kde kandidáti byli v roce 2022 v této obci, vpravo kandidátky 2026. Tmavé pásy jsou přesuny mezi kandidátkami, světlé setrvání nebo příchod nových. Číslo je počet lidí.</p>
+    <svg viewBox="0 0 ${W} ${HH}" role="img" aria-label="Přesuny kandidátů mezi kandidátkami 2022 a 2026" style="width:100%;max-width:${W}px;height:auto">${bands}${lab(lp, x0, "end")}${lab(rp, x1, "start")}</svg>
+    ${tables}`;
+}
+document.getElementById("movesBtn").addEventListener("click", e => {
+  const on = e.currentTarget.getAttribute("aria-pressed") !== "true";
+  e.currentTarget.setAttribute("aria-pressed", on);
+  document.body.classList.toggle("moves", on);
+  const fl = document.getElementById("flow");
+  if (on && !fl.innerHTML) fl.innerHTML = flowSvg();
+  fl.hidden = !on;
+});
+if (new URLSearchParams(location.search).has("presuny")) document.getElementById("movesBtn").click();
+const tabs = document.getElementById("tabs");
+const panes = [...document.querySelectorAll(".list"), ...(solo.length ? [document.getElementById("nk")] : [])];
+tabs.innerHTML = full.map(([no, ps]) => `<button role="tab" data-t="l${no}">${no}. ${esc(ps[0].list.slice(0, 22))}${ps[0].list.length > 22 ? "…" : ""}</button>`).join("")
+  + (solo.length ? `<button role="tab" data-t="nk">Jednotliví kandidáti (${solo.length})</button>` : "");
+function selectTab(id) {
+  panes.forEach(el => el.classList.toggle("on", el.id === id));
+  tabs.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", b.dataset.t === id));
+  try { sessionStorage.setItem("tab:" + location.pathname, id); } catch (e) {}
+}
+tabs.addEventListener("click", e => { const b = e.target.closest("button"); if (b) selectTab(b.dataset.t); });
+let saved = null; try { saved = sessionStorage.getItem("tab:" + location.pathname); } catch (e) {}
+selectTab(panes.some(p => p.id === saved) ? saved : panes[0]?.id);
+document.querySelectorAll(".more").forEach(b => b.addEventListener("click", () => {
+  b.parentElement.querySelectorAll(".row[hidden]").forEach(r => r.hidden = false); b.remove(); }));
+
+const byId = Object.fromEntries(people.map(p => [p.id, p]));
+const dlg = document.getElementById("prof");
+function votesChart(p) {
+  const d = p.history.filter(h => h.votes != null);
+  if (!d.length) return "";
+  const W = 520, H = 130, pb = 20, bw = 24, max = Math.max(...d.map(h => h.votes)) || 1;
+  const x = i => 30 + (i + .5) * (W - 30) / d.length, y = v => (H - pb) * (1 - v / max) + 14;
+  const bars = d.map((h, i) => { const hh = (H - pb + 14) - y(h.votes), x0 = x(i) - bw / 2, y0 = y(h.votes), r = Math.min(4, hh);
+    return `<path d="M${x0},${H - pb + 14} V${y0 + r} Q${x0},${y0} ${x0 + r},${y0} H${x0 + bw - r} Q${x0 + bw},${y0} ${x0 + bw},${y0 + r} V${H - pb + 14} Z" fill="var(--ink)" opacity="${h.elected ? 1 : .45}"/>
+      <text x="${x(i)}" y="${y0 - 4}" text-anchor="middle" style="fill:var(--ink)">${num(h.votes)}</text>
+      <text x="${x(i)}" y="${H + 12}" text-anchor="middle">${h.year}</text>`; }).join("");
+  const moves = [...d].reverse().filter(h => h.vrank != null).map(h => {
+    const delta = h.pos - h.vrank;
+    const mv = delta > 0 ? `voliči ${f(p, "ho", "ji")} posunuli o ${delta} ${delta === 1 ? "místo" : delta < 5 ? "místa" : "míst"} nahoru` : delta < 0 ? `voliči ${f(p, "ho", "ji")} posunuli o ${-delta} ${-delta === 1 ? "místo" : -delta < 5 ? "místa" : "míst"} dolů` : "voliči pořadí potvrdili";
+    return `<li><span>${h.year}</span><span>na kandidátce ${h.pos}., podle hlasů ${h.vrank}. z ${h.vn}: ${mv}; ${Math.round(h.vshare * 1000) / 10} % hlasů kandidátky${h.skip ? `, ${f(p, "zvolen", "zvolena")} díky preferenčním hlasům` : ""}</span></li>`; }).join("");
+  return `<h3>Hlasy ve volbách</h3><svg viewBox="0 0 ${W} ${H + 18}" role="img" aria-label="Počet hlasů v jednotlivých volbách" style="width:100%;height:auto;overflow:visible;font:12px var(--sans);fill:var(--muted)">${bars}</svg>
+    <p class="note">Tmavý sloupec: zvolen. Hlasy nejsou srovnatelné mezi obcemi různé velikosti, důležitější je pořadí na kandidátce.</p>
+    <ul class="why">${moves}</ul>`;
+}
+function profile(p) {
+  const past = p.history.filter(h => h.year !== "2026");
+  const lists = runs(p).map(r => `${esc(r.list)} (${r.from === r.to ? r.from : r.from + "–" + r.to})`).join(" → ");
+  const rows = [...p.history].reverse().map(h => `<tr><td>${h.year}</td><td>${esc(h.list)}<br><span class="note">${esc(h.town)}${h.member ? ", " + f(p, "člen", "členka") + " " + esc(h.party) : ""}</span></td>
+    <td class="n">${h.pos}.</td><td class="n opt">${h.votes == null ? "–" : num(h.votes)}</td>
+    <td class="n opt">${h.vrank == null ? "–" : `${h.vrank}. z ${h.vn}`}</td>
+    <td>${h.year === "2026" ? "kandiduje" : h.elected ? (h.skip ? f(p, "zvolen díky preferenčním hlasům", "zvolena díky preferenčním hlasům") : f(p, "zvolen", "zvolena")) : "ne"}</td></tr>`).join("");
+  const conf = x => x == null ? "" : x >= 0.9999 ? "velmi vysoká jistota" : x >= 0.999 ? "vysoká jistota" : "jistota nižší";
+  const pc = x => x == null ? "" : ` (${conf(x)}, odhad ${(Math.min(x, 0.9999) * 100).toLocaleString("cs-CZ", {maximumFractionDigits: 2})} %)`;
+  const why = [...p.history].reverse().filter(h => h.why.length).map(h => `<li><span>${h.year}</span><span>${h.why.join(", ")}${pc(h.p)}</span></li>`).join("");
+  return `<button class="close" type="button" autofocus>Zavřít</button>
+    <h2>${esc(p.name)}, ${p.age}</h2><p class="sub">${esc(p.occ)}, ${esc(p.town)}, ${affil(p)}</p>
+    <div class="figs"><div><b>${p.ran + 1}×</b><span>kandidatur včetně 2026</span></div><div><b>${p.elected}×</b><span>${f(p, "zvolen", "zvolena")} 2002–2022</span></div>
+      <div><b>${p.since ?? "2026"}</b><span>první doložená kandidatura</span></div><div><b>${runs(p).length}</b><span>různých kandidátek</span></div></div>
+    ${p.ran ? `<p><strong>${f(p, "Kandidoval", "Kandidovala")} za:</strong> ${lists}</p>` : `<p class="note">Jinou kandidaturu v této obci od roku 2002 jsme nenašli. Nemusí to znamenat první kandidaturu (například po změně příjmení).</p>`}
+    <h3>V souvislostech</h3>
+    <ul class="why">
+      <li><span>Věk</span><span>${p.age} let: ${p.age_older >= 0.5 ? `mladší než ${Math.round(p.age_older * 100)} %` : `starší než ${Math.round((1 - p.age_older) * 100)} %`} kandidátů v ČR (2026)</span></li>
+      ${p.field && !p.field.startsWith("Nezařazeno") ? `<li><span>Obor</span><span><a href="../povolani.html#s-${p.field.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-")}">${esc(p.field)}</a>: v roce 2026 kandiduje ${num(p.field_n)} lidí v ČR, ${p.field_here} v této obci</span></li>` : ""}
+    </ul>
+    ${votesChart(p)}
+    <h3>Časová osa kandidatur</h3>
+    <table><thead><tr><th>Rok</th><th>Kandidátka a obec</th><th>Pořadí</th><th class="opt">Hlasy</th><th>Výsledek</th></tr></thead><tbody>${rows}</tbody></table>
+    ${why ? `<h3>Jak jsme kandidatury spojili</h3><ul class="why">${why}</ul>` : ""}
+    ${p.family ? `<p class="note">V obci kandidoval i jmenovec jiného věku, spojení proto vyžadovala další shodu.</p>` : ""}
+    ${p.maybe.length ? `<div class="maybe"><p><strong>Možná také ${f(p, "on", "ona")}</strong>, spojení není jisté a do počtů se nezapočítává:</p>
+      ${p.maybe.map(m => `<p>${m.year}, ${esc(m.town)}, ${esc(m.list)}, ${esc(m.occ)}, ${m.age} let. Shoda: ${m.why.join(", ")}. Odhad jistoty ${Math.min(99, Math.round(m.p * 100))} %.</p>`).join("")}</div>` : ""}
+    <a class="report" href="mailto:${meta.contact}?subject=${encodeURIComponent("Místník: chyba u " + p.name + " (" + p.id + ")")}">Nahlásit chybu nebo námitku</a>`;
+}
+let lastRow = null;
+function openProfile(id, push) {
+  const p = byId[id]; if (!p) return;
+  document.getElementById("profBody").innerHTML = profile(p); if (!dlg.open) dlg.showModal();
+  if (push) history.pushState({p: id}, "", "#" + encodeURIComponent(id));
+}
+window.addEventListener("popstate", () => { const id = decodeURIComponent(location.hash.slice(1)); if (byId[id]) openProfile(id, false); else if (dlg.open) dlg.close(); });
+if (location.hash.length > 1) openProfile(decodeURIComponent(location.hash.slice(1)), false);
+document.addEventListener("click", e => {
+  const r = e.target.closest(".row");
+  if (r) { lastRow = r; openProfile(r.dataset.id, true); return; }
+  if (e.target.closest(".close")) dlg.close();
+
+});
+dlg.addEventListener("close", () => { if (location.hash) history.replaceState(null, "", location.pathname); lastRow?.focus(); });
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+</script>
+</body>
+</html>

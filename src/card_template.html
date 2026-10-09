@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kandidáti __TOWN__ 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #fdfdfb; --ink: #1c2430; --muted: #5d6573; --rule: #d9dce1; --stamp: #5b3f8c; --stamp-soft: #ece6f5; --warn: #8a5a00;
+  --serif: "Newsreader", Georgia, serif; --sans: "Public Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --stamp: #b9a2e6; --stamp-soft: #2a2238; --warn: #e0b45c; }
+}
+:root[data-theme="dark"] { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --stamp: #b9a2e6; --stamp-soft: #2a2238; --warn: #e0b45c; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--sans); }
+main { max-width: 760px; margin: 0 auto; padding: 32px 16px 80px; }
+header h1 { font: 600 2.4rem/1.1 var(--serif); margin: 0 0 .25rem; letter-spacing: -.01em; }
+header p { margin: 0; color: var(--muted); max-width: 60ch; }
+.legend { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0 8px; font-size: .875rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+h2 { font: 600 1.35rem/1.25 var(--serif); margin: 48px 0 4px; display: flex; gap: 12px; align-items: baseline; }
+h2 .no { font-family: var(--sans); font-size: .95rem; color: var(--stamp); border: 1.5px solid var(--stamp); border-radius: 50%;
+  width: 1.9em; height: 1.9em; display: inline-grid; place-items: center; flex: none; }
+.listmeta { color: var(--muted); font-size: .875rem; margin: 0 0 12px; }
+.cand { border-top: 1px solid var(--rule); padding: 16px 0; display: grid; grid-template-columns: 2.2rem 1fr; gap: 0 12px; }
+.pos { color: var(--muted); font-variant-numeric: tabular-nums; padding-top: .3rem; text-align: right; }
+.name { font: 600 1.25rem/1.3 var(--serif); margin: 0; }
+.name small { font: 400 1rem var(--sans); color: var(--muted); margin-left: .35rem; }
+.who { margin: 2px 0 10px; color: var(--muted); }
+.track { display: grid; grid-template-columns: repeat(7, 2.4rem); gap: 6px; margin: 4px 0 8px; }
+.slot { display: grid; justify-items: center; gap: 2px; font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.box { width: 1.6rem; height: 1.6rem; border: 1.5px solid var(--ink); border-radius: 3px; position: relative; }
+.box.none { border: 1.5px dotted var(--rule); }
+.box.now { border-color: var(--stamp); border-style: dashed; }
+.box.won::before, .box.won::after { content: ""; position: absolute; left: 50%; top: 50%; width: 140%; height: 2px; background: var(--stamp);
+  transform: translate(-50%, -50%) rotate(45deg); border-radius: 1px; }
+.box.won::after { transform: translate(-50%, -50%) rotate(-45deg); }
+.legend .box { width: 1.1rem; height: 1.1rem; }
+.summary { margin: 0; }
+.summary strong { font-weight: 600; }
+.lists { margin: 6px 0 0; padding: 0; list-style: none; font-size: .9rem; color: var(--muted); }
+.lists li { display: grid; grid-template-columns: 6.5rem 1fr; gap: 8px; }
+.lists .yrs { font-variant-numeric: tabular-nums; }
+.note { font-size: .875rem; color: var(--warn); margin: 6px 0 0; }
+details { margin-top: 10px; }
+summary { cursor: pointer; color: var(--stamp); font-weight: 500; width: fit-content; }
+summary:focus-visible, button:focus-visible { outline: 2px solid var(--stamp); outline-offset: 3px; border-radius: 2px; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .875rem; }
+th, td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); }
+td.y { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.maybe { margin-top: 12px; padding: 10px 12px; background: var(--stamp-soft); border-radius: 4px; font-size: .875rem; }
+.maybe p { margin: 0 0 4px; }
+.report { margin-top: 10px; background: none; border: 1px solid var(--rule); color: var(--ink); font: inherit; font-size: .875rem;
+  padding: 4px 10px; border-radius: 4px; cursor: pointer; }
+.badge { display: inline-block; font: 500 .8rem/1.6 var(--sans); color: var(--stamp); border: 1.5px solid var(--stamp); border-radius: 999px;
+  padding: 0 .6rem; margin: 0 0 8px; }
+.council { margin: 28px 0 0; padding: 16px 0 0; border-top: 2px solid var(--ink); }
+.council h2 { margin: 0 0 6px; }
+.council .big { font: 600 2rem/1 var(--serif); color: var(--stamp); }
+.council ul { margin: 8px 0 0; padding-left: 1.1rem; color: var(--muted); font-size: .9rem; }
+footer { margin-top: 56px; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--rule); padding-top: 12px; }
+@media (max-width: 480px) {
+  header h1 { font-size: 1.9rem; }
+  .track { grid-template-columns: repeat(7, 1fr); }
+  .lists li { grid-template-columns: 1fr; gap: 0; }
+  .lists li + li { margin-top: 4px; }
+  table .opt { display: none; }
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>__TOWN__</h1>
+    <p>Kandidáti do zastupitelstva 2026 a jejich komunální historie od roku 2002, spojená napříč volbami podle jména, věku, obce a spolukandidátů.</p>
+    <div class="legend" aria-hidden="true">
+      <span><i class="box won"></i>zvolen</span><span><i class="box"></i>kandidoval</span>
+      <span><i class="box none"></i>nekandidoval</span><span><i class="box now"></i>kandiduje 2026</span>
+    </div>
+  </header>
+  <section class="council" id="council"></section>
+  <div id="lists"></div>
+  <footer>Zdroj: ČSÚ, volby.gov.cz, kandidátní listiny 2002–2026 (registr k 7. 10. 2026). Pracovní náhled, nezveřejňovat.</footer>
+</main>
+<script>
+const people = __DATA__;
+const meta = __META__;
+const YEARS = ["2002", "2006", "2010", "2014", "2018", "2022", "2026"];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const f = (p, m, z) => p.female ? z : m;
+
+function track(p) {
+  const by = Object.fromEntries(p.history.map(h => [h.year, h]));
+  return YEARS.map(y => {
+    const h = by[y];
+    const cls = !h ? "none" : y === "2026" ? "now" : h.elected ? "won" : "";
+    const label = !h ? "nekandidoval" : y === "2026" ? "kandiduje" : h.elected ? "zvolen" : "kandidoval";
+    return `<div class="slot"><i class="box ${cls}" title="${y}: ${label}"></i>${y.slice(2)}</div>`;
+  }).join("");
+}
+
+function listRuns(p) {
+  const runs = [];
+  for (const h of p.history) {
+    const last = runs[runs.length - 1];
+    if (last && last.list === h.list && last.town === h.town) last.to = h.year;
+    else runs.push({list: h.list, town: h.town, from: h.year, to: h.year});
+  }
+  return runs.map(r => `<li><span class="yrs">${r.from === r.to ? r.from : r.from + "–" + r.to}</span>
+    <span>${esc(r.list)}${r.town !== p.town ? `, ${esc(r.town)}` : ""}</span></li>`).join("");
+}
+
+function summary(p) {
+  if (!p.ran) {
+    return p.rare
+      ? `<p class="summary"><strong>${f(p, "První kandidatura", "První kandidatura")}</strong> v datech od roku 2002.</p>`
+      : `<p class="summary">V datech od roku 2002 jsme ${f(p, "ho", "ji")} nenašli. U častého jména to nemusí znamenat první kandidaturu.</p>`;
+  }
+  const last = p.history.filter(h => h.year !== "2026").at(-1);
+  const now = last.elected && last.year === "2022" ? ` ${f(p, "Zvolen", "Zvolena")} v roce 2022.` : "";
+  return `<p class="summary"><strong>${f(p, "Kandidoval", "Kandidovala")} ${p.ran}×, ${f(p, "zvolen", "zvolena")} ${p.elected}×</strong>, poprvé ${p.since}.${now}</p>`;
+}
+
+function detail(p) {
+  if (!p.ran && !p.maybe.length) return "";
+  const rows = p.history.map(h => `<tr><td class="y">${h.year}</td><td>${esc(h.list)}${h.party && h.party !== "BEZPP" ? `<br><span style="color:var(--muted)">člen ${esc(h.party)}</span>` : ""}</td>
+    <td class="opt">${esc(h.occ)}</td><td class="opt">${esc(h.town)}</td><td>${h.year === "2026" ? "kandiduje" : h.elected ? "zvolen" : "ne"}</td></tr>`).join("");
+  const why = p.history.filter(h => h.why.length).map(h => `<li><span class="yrs">${h.year}</span><span>${h.why.join(", ")}</span></li>`).join("");
+  const conf = why ? `<p class="listmeta" style="margin:12px 0 2px">Proč jde o stejného člověka</p><ul class="lists">${why}</ul>` : "";
+  const fam = p.family ? `<p class="note">V obci kandidoval i jmenovec jiného věku, spojení proto vyžadovala další shodu.</p>` : "";
+  const maybe = p.maybe.length ? `<div class="maybe"><p><strong>Možná také ${f(p, "on", "ona")}</strong>. Spojení zatím není jisté, do souhrnu se nepočítá:</p>
+    ${p.maybe.map(m => `<p>${m.year}, ${esc(m.town)}, ${esc(m.list)}, ${esc(m.occ)}, ${m.age} let. Shoda: ${m.why.join(", ")}.</p>`).join("")}</div>` : "";
+  return `<details><summary>Celá historie</summary>
+    <table><thead><tr><th>Rok</th><th>Kandidátka</th><th class="opt">Povolání</th><th class="opt">Obec</th><th>Mandát</th></tr></thead><tbody>${rows}</tbody></table>
+    ${conf}${fam}${maybe}<button class="report" type="button">Nahlásit chybné spojení</button></details>`;
+}
+
+const lists = Map.groupBy ? Map.groupBy(people, p => p.list_no) : people.reduce((m, p) => m.set(p.list_no, [...(m.get(p.list_no) || []), p]), new Map());
+document.getElementById("lists").innerHTML = [...lists].map(([no, ps]) => {
+  const veterans = ps.filter(p => p.ran > 0).length;
+  return `<section><h2><span class="no">${no}</span>${esc(ps[0].list)}</h2>
+    <p class="listmeta">${ps.length} kandidátů, ${veterans} z nich už dříve kandidovalo</p>
+    ${ps.map(p => `<article class="cand"><div class="pos">${p.pos}.</div><div>
+      <p class="name">${esc(p.name)}<small>${p.age}</small></p>
+      <p class="who">${esc(p.occ)}, ${esc(p.town)}${p.party && p.party !== "BEZPP" ? `, člen ${esc(p.party)}` : ""}</p>
+      ${p.incumbent ? `<p class="badge">${f(p, "Zvolen", "Zvolena")} 2022, obhajuje</p>` : ""}
+      <div class="track">${track(p)}</div>
+      ${summary(p)}
+      ${p.ran ? `<ul class="lists">${listRuns(p)}</ul>` : ""}
+      ${detail(p)}
+    </div></article>`).join("")}</section>`;
+}).join("");
+document.getElementById("council").innerHTML = `<h2>Dnešní zastupitelstvo</h2>
+  <p><span class="big">${meta.running}</span> z ${meta.elected22} zastupitelů zvolených v roce 2022 kandiduje znovu.</p>
+  ${meta.leaving.length ? `<p class="listmeta">Na kandidátkách 2026 tu nejsou:</p><ul>${meta.leaving.map(l =>
+    `<li>${esc(l.name)}, ${esc(l.list)}${l.elsewhere ? `, kandiduje v obci ${esc(l.elsewhere)}` : ""}</li>`).join("")}</ul>` : ""}
+  <p class="listmeta">Počítáno ze zvolených ve volbách 2022. Změny během období (rezignace, náhradníci) data nezachycují.</p>`;
+document.querySelectorAll(".report").forEach(b => b.addEventListener("click", () => { b.textContent = "Nahlášeno, děkujeme"; b.disabled = true; }));
+</script>
+</body>
+</html>

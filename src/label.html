@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Místník – označování</title>
+<style>
+:root { --paper: #f5f6f4; --ink: #17202a; --muted: #5a626d; --rule: #d7dad8; --grid: #e8eae7; --accent: #424b00; --diff: #fff3c4;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif; }
+@media (prefers-color-scheme: dark) { :root { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --grid: #23272e; --accent: #b3c075; --diff: #3a3418; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.45 var(--sans); }
+main { max-width: 980px; margin: 0 auto; padding: 16px 16px 120px; }
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--muted); font-size: .9rem; }
+.prog { height: 4px; background: var(--grid); border-radius: 2px; margin: 8px 0 20px; }
+.prog i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+h1 { font-size: 1.15rem; margin: 0 0 6px; }
+.help { color: var(--muted); font-size: .9rem; margin: 0 0 16px; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; word-wrap: break-word; }
+th { width: 8.5rem; color: var(--muted); font-weight: 500; font-size: .9rem; }
+thead td { font-weight: 600; border-bottom: 2px solid var(--ink); }
+td.d { background: var(--diff); }
+.actions { position: fixed; left: 0; right: 0; bottom: 0; background: var(--paper); border-top: 1px solid var(--rule); padding: 12px 16px; }
+.actions div { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; }
+button { font: 600 1rem var(--sans); min-height: 52px; border-radius: 6px; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+button.same { background: var(--ink); color: var(--paper); }
+button.back { border-color: var(--rule); font-weight: 500; padding: 0 16px; }
+button:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button kbd { font: 400 .8rem var(--sans); opacity: .7; margin-left: 6px; }
+textarea { width: 100%; margin-top: 14px; font: inherit; font-size: .95rem; padding: 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); }
+.done { text-align: center; padding: 60px 0; }
+.was { font-size: .85rem; color: var(--muted); margin-top: 8px; }
+@media (max-width: 600px) { th { width: 5rem; } button kbd { display: none; } button { font-size: .95rem; } .actions div { grid-template-columns: 1fr 1fr 1fr; } button.back { grid-column: 1 / -1; min-height: 40px; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><span id="count"></span><span id="saved"></span></div>
+  <div class="prog"><i id="progbar" style="width:0"></i></div>
+  <div id="card"></div>
+</main>
+<p style="max-width:980px;margin:0 auto;padding:0 16px"><a href="#" id="mode">Rychlý režim: 20 dvojic na stránku</a></p>
+<div class="actions"><div>
+  <button class="same" id="bS" type="button">Stejný člověk<kbd>S</kbd></button>
+  <button id="bR" type="button">Různí lidé<kbd>R</kbd></button>
+  <button id="bN" type="button">Nevím<kbd>N</kbd></button>
+  <button class="back" id="bB" type="button">Zpět<kbd>←</kbd></button>
+</div></div>
+<script>
+const FIELDS = [["Volby", "year"], ["Jméno", r => [r.TITULPRED, r.JMENO, r.PRIJMENI, r.TITULZA].filter(Boolean).join(" ")],
+  ["Věk", "VEK"], ["Bydliště", "BYDLISTEN"], ["Povolání", "POVOLANI"], ["Kandidátka", "NAZEVCELK"],
+  ["Členství", "party"]];  // election result is not identity evidence, it changes between elections
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+let sample = [], labels = {}, i = 0;
+const val = (r, f) => typeof f === "function" ? f(r) : r[f];
+
+function render() {
+  const done = Object.keys(labels).filter(k => sample.some(s => s.key === k)).length;
+  document.getElementById("count").textContent = `${Math.min(i + 1, sample.length)} / ${sample.length}`;
+  document.getElementById("saved").textContent = `označeno ${done}`;
+  document.getElementById("progbar").style.width = (100 * done / sample.length) + "%";
+  if (i >= sample.length) { document.getElementById("card").innerHTML = `<div class="done"><h1>Hotovo, díky.</h1><p class="help">Všechna rozhodnutí jsou uložená. Tlačítkem Zpět se dá k čemukoli vrátit.</p></div>`; return; }
+  const s = sample[i], prev = labels[s.key];
+  const ageNote = `Věk při volbách ${esc(s.a.year)}: ${esc(s.a.VEK)}, při volbách ${esc(s.b.year)}: ${esc(s.b.VEK)} (rozdíl let mezi volbami ${esc(s.b.year - s.a.year)}).`;
+  const rar = s.namesakes == null ? "" : ` Lidí v ČR se stejným jménem a ročníkem narození: odhadem ${s.namesakes < 0.01 ? "méně než 0,01" : String(s.namesakes).replace(".", ",")}.`;
+  document.getElementById("card").innerHTML = `<h1>Je to tentýž člověk?</h1><p class="help">${ageNote}${esc(rar)}</p>
+    <table><thead><tr><th></th><td>A</td><td>B</td></tr></thead><tbody>
+    ${FIELDS.map(([lab, f]) => { const x = val(s.a, f), y = val(s.b, f);
+      return `<tr><th>${lab}</th><td class="${x !== y && lab !== "Volby" && lab !== "Věk" ? "d" : ""}">${esc(x)}</td><td class="${x !== y && lab !== "Volby" && lab !== "Věk" ? "d" : ""}">${esc(y)}</td></tr>`; }).join("")}
+    </tbody></table>
+    <textarea id="note" rows="2" placeholder="Poznámka (nepovinné), například čím sis jistý">${esc(prev?.note)}</textarea>
+    ${prev ? `<p class="was">Dříve označeno: ${{same: "stejný člověk", different: "různí lidé", unsure: "nevím"}[prev.label]}</p>` : ""}`;
+}
+
+async function decide(label) {
+  if (i >= sample.length) return;
+  const s = sample[i], note = document.getElementById("note")?.value || "";
+  const res = await fetch("/label", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({key: s.key, label, note})});
+  if (!res.ok) { alert("Uložení selhalo, zkus to znovu."); return; }
+  labels[s.key] = {label, note}; i++; render(); window.scrollTo(0, 0);
+}
+document.getElementById("bS").onclick = () => decide("same");
+document.getElementById("bR").onclick = () => decide("different");
+document.getElementById("bN").onclick = () => decide("unsure");
+document.getElementById("bB").onclick = () => { if (i > 0) { i--; render(); } };
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "TEXTAREA") return;
+  const k = e.key.toLowerCase();
+  if (k === "s") decide("same"); else if (k === "r") decide("different"); else if (k === "n") decide("unsure");
+  else if (e.key === "ArrowLeft") document.getElementById("bB").click();
+});
+(async () => {
+  [sample, labels] = await Promise.all([fetch("/sample").then(r => r.json()), fetch("/labels").then(r => r.json())]);
+  i = sample.findIndex(s => !labels[s.key]); if (i < 0) i = sample.length;
+  render();
+})();
+
+// quick mode: many pairs per page, mark only the exceptions, the rest in one click
+const one = r => `${esc([r.TITULPRED, r.JMENO, r.PRIJMENI].filter(Boolean).join(" "))}, ${esc(r.VEK)}, ${esc(r.BYDLISTEN)}<br><span style="color:var(--muted)">${esc(r.POVOLANI)}; ${esc(r.NAZEVCELK)}; ${esc(r.party)}</span>`;
+function quick() {
+  document.querySelector(".actions").style.display = "none";
+  const todo = sample.filter(s => !labels[s.key]).slice(0, 20);
+  const card = document.getElementById("card");
+  if (!todo.length) { card.innerHTML = `<div class="done"><h1>Hotovo, díky.</h1></div>`; return; }
+  card.innerHTML = `<h1>Rychlý režim</h1><p class="help">Označ jen dvojice, kde nejde o stejného člověka nebo si nejsi jistý. Ostatní potvrdí tlačítko dole.</p>
+    <table><tbody>${todo.map((s, n) => `<tr data-k="${esc(s.key)}"><td style="width:4rem">${esc(s.a.year)}<br>${esc(s.b.year)}</td><td>${one(s.a)}</td><td>${one(s.b)}</td>
+      <td style="width:9rem;white-space:nowrap"><button type="button" data-l="different" style="min-height:36px;padding:0 8px">Různí</button>
+      <button type="button" data-l="unsure" style="min-height:36px;padding:0 8px">Nevím</button></td></tr>`).join("")}</tbody></table>
+    <p><button type="button" id="restSame" class="same" style="width:100%;margin-top:16px">Ostatní na této stránce jsou stejný člověk</button></p>`;
+  card.querySelectorAll("tr[data-k] button").forEach(b => b.onclick = async () => {
+    const tr = b.closest("tr"); await post(tr.dataset.k, b.dataset.l); tr.style.opacity = .4; tr.dataset.done = 1; });
+  document.getElementById("restSame").onclick = async () => {
+    for (const tr of card.querySelectorAll("tr[data-k]")) if (!tr.dataset.done) await post(tr.dataset.k, "same");
+    quick(); window.scrollTo(0, 0); };
+}
+async function post(key, label) {
+  const res = await fetch("/label", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({key, label, note: ""})});
+  if (res.ok) labels[key] = {label, note: ""};
+  const done = Object.keys(labels).length;
+  document.getElementById("saved").textContent = `označeno ${done}`;
+  document.getElementById("progbar").style.width = (100 * done / sample.length) + "%";
+}
+document.getElementById("mode").onclick = e => { e.preventDefault(); quick(); };
+</script>
+</body>
+</html>

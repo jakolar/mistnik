@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Místník – otevřená data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --paper: #f5f6f4; --ink: #17202a; --muted: #5a626d; --rule: #d7dad8; --accent: #424b00; --serif: "Literata", Georgia, serif; --sans: "Public Sans", system-ui, sans-serif; }
+@media (prefers-color-scheme: dark) { :root { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --accent: #b3c075; } }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.6 var(--serif); }
+main { max-width: 700px; margin: 0 auto; padding: 32px 16px 80px; }
+a { color: var(--accent); }
+.back { font: 600 .95rem var(--sans); }
+h1 { font-size: 2.2rem; line-height: 1.15; margin: 20px 0 8px; }
+h2 { font-size: 1.3rem; margin: 36px 0 8px; }
+table { border-collapse: collapse; font: .9rem/1.4 var(--sans); width: 100%; }
+td, th { text-align: left; vertical-align: top; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule); }
+code { font-size: .9em; }
+.wrap { overflow-x: auto; }
+p, li { max-width: 66ch; }
+.lead { font-size: 1.15rem; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">← Místník</a>
+  <h1>Otevřená data</h1>
+  <p class="lead">Spojování kandidatur do osob je náš odhad. Aby si ho mohl kdokoli zkontrolovat, zveřejňujeme všechna spojení i ta, kterým zatím nevěříme. Soubory neobsahují jména ani věk: kandidatury jsou označené klíčem z dat ČSÚ, ze kterých si údaje doplníte.</p>
+
+  <h2>Soubory</h2>
+  <div class="wrap"><table>
+    <tr><th>soubor</th><th>obsah</th><th>velikost</th></tr>
+    <tr><td><a href="data/osoby.csv.gz">osoby.csv.gz</a></td><td>každá kandidatura 2002–2026 a číslo osoby, ke které ji přiřazujeme (__N_OSOBY__ osob)</td><td>__osoby.csv.gz__</td></tr>
+    <tr><td><a href="data/spojeni.csv.gz">spojeni.csv.gz</a></td><td>zveřejněná spojení dvou kandidatur s jistotou a důvody (__N_SPOJENI__)</td><td>__spojeni.csv.gz__</td></tr>
+    <tr><td><a href="data/nejista_spojeni.csv.gz">nejista_spojeni.csv.gz</a></td><td><strong>nepotvrzená</strong> spojení, která na webu nezobrazujeme (__N_NEJISTA__). Nejsou to tvrzení o tom, že jde o stejného člověka.</td><td>__nejista_spojeni.csv.gz__</td></tr>
+    <tr><td><a href="data/povolani_zvolitelnost.csv">povolani_zvolitelnost.csv</a></td><td>podíl zvolených podle zápisu povolání 2002–2022 (zápisy s aspoň 1 000 kandidaturami, bez veřejných funkcí)</td><td>__povolani_zvolitelnost.csv__</td></tr>
+  </table></div>
+  <p>Kódování UTF-8, oddělovač čárka. Čísla osob se mohou mezi verzemi dat měnit; stálý je klíč kandidatury.</p>
+
+  <h2>Klíč kandidatury</h2>
+  <p><code>rok:KODZASTUP:COBVODU:POR_STR_HL:PORCISLO</code>, například <code>2022:554782:1:4:12</code>. Sloupce odpovídají souboru kandidátů (<code>kvrk</code>) v otevřených datech komunálních voleb na <a href="https://www.volby.gov.cz/opendata/opendata.htm">volby.gov.cz</a>: kód zastupitelstva, volební obvod, číslo kandidátky a pořadí na ní. Používáme jen řádné volby.</p>
+
+  <h2>Sloupce spojení</h2>
+  <div class="wrap"><table>
+    <tr><td><code>id_a</code>, <code>id_b</code></td><td>klíče dvou kandidatur, starší první</td></tr>
+    <tr><td><code>decision</code></td><td><code>implied</code> a <code>auto_match</code>: spojeno podle pravidel; <code>auto_jev</code>: spojeno s potvrzením jazykového modelu; <code>manual_review</code>: nejisté, čeká na kontrolu; <code>manual_review_namesake</code>: v obci kandiduje jmenovec; <code>possible_match</code>: slabší kandidát na shodu</td></tr>
+    <tr><td><code>p</code></td><td>odhad pravděpodobnosti, že jde o stejného člověka (výpočet modelu, ne ověřený fakt)</td></tr>
+    <tr><td><code>geo</code></td><td>kde kandidovali: <code>zast</code> stejné zastupitelstvo, <code>city</code> město a jeho část, <code>orp</code>, <code>okres</code>, <code>kraj</code> stejné území, <code>other</code> jinde</td></tr>
+    <tr><td><code>cocand</code></td><td>počet společných spolukandidátů: <code>0</code>, <code>1</code>, <code>2+</code>, <code>na</code> nelze posoudit</td></tr>
+    <tr><td><code>party</code></td><td>stranická příslušnost: <code>same</code> stejná strana, <code>diff</code> jiná, <code>both_bezpp</code> oba bez stranické příslušnosti</td></tr>
+    <tr><td><code>titles</code></td><td>tituly: <code>same</code>, <code>gained</code> titul přibyl, <code>other</code> nesouhlasí, <code>none</code> bez titulů</td></tr>
+    <tr><td><code>occ</code></td><td>povolání: <code>same</code>, <code>similar</code>, <code>same_field</code> stejný obor, <code>to_retired</code> odchod do důchodu, <code>from_student</code> ze studenta, <code>diff</code> jiné, <code>missing</code> chybí</td></tr>
+    <tr><td><code>list_party</code></td><td>kandidátky sdílejí stranu ve složení: <code>shared</code>, <code>none</code>, <code>na</code> nelze posoudit (nezávislí)</td></tr>
+    <tr><td><code>same_list</code>, <code>same_res</code></td><td>stejný název kandidátky; stejná část obce v bydlišti</td></tr>
+    <tr><td><code>second</code></td><td>druhá nezávislá shoda: <code>rules</code> podle pravidel, <code>jev_field</code> podle jazykového modelu</td></tr>
+    <tr><td><code>jev_pair</code>, <code>jev3</code></td><td>odpověď jazykového modelu Jev na otázku, zda jde o stejného člověka (0–1); <code>jev3</code> je novější verze dotazu s bohatším kontextem</td></tr>
+  </table></div>
+  <p>Jak se z toho skládá rozhodnutí, popisujeme v <a href="metodika.html">metodice</a>. Spojení zakázaná kvůli nesouhlasu věku nebo dvěma kandidaturám v jedněch volbách nezveřejňujeme.</p>
+
+  <h2>Licence a chyby</h2>
+  <p>Data můžete volně používat podle licence <a href="https://creativecommons.org/licenses/by/4.0/deed.cs">CC BY 4.0</a> s uvedením zdroje „Místník (mistnik.cz), z dat ČSÚ“. Podkladová data jsou z otevřených dat Českého statistického úřadu. Data se týkají skutečných lidí: nepoužívejte je k obtěžování kandidátů a nepotvrzená spojení nevydávejte za fakta. Chybné spojení nám prosím pošlete na <a href="mailto:__CONTACT__">__CONTACT__</a> s oběma klíči kandidatur.</p>
+</main>
+</body>
+</html>

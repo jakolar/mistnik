@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Povolání kandidátů</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f5f6f4; --ink: #17202a; --muted: #5a626d; --rule: #d7dad8; --grid: #e8eae7; --stamp: #424b00; --bar: #17202a; --soft: #ebede6;
+  --serif: "Literata", Georgia, serif; --sans: "Public Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --grid: #23272e; --stamp: #b3c075; --bar: #c9ced6; --soft: #1e2228; }
+}
+:root[data-theme="dark"] { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --grid: #23272e; --stamp: #b3c075; --bar: #c9ced6; --soft: #1e2228; }
+* { box-sizing: border-box; }
+a { color: var(--stamp); }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--sans); }
+main { max-width: 820px; margin: 0 auto; padding: 32px 16px 80px; }
+h1 { font: 600 2.4rem/1.1 var(--serif); margin: 0 0 .25rem; }
+.lede { color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+input[type=search] { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); }
+input:focus-visible, button:focus-visible, a:focus-visible, rect:focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
+.index-h { font: 600 .8rem var(--sans); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 16px 0 0; }
+.index { list-style: none; padding: 0; margin: 12px 0 0; columns: 2 280px; column-gap: 24px; font-size: .9rem; }
+.index li { break-inside: avoid; display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px solid var(--grid); }
+.index a { color: var(--ink); text-decoration: none; }
+.index a:hover { color: var(--stamp); }
+.index span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+article { border-top: 2px solid var(--ink); margin-top: 56px; padding-top: 16px; }
+article h2 { font: 600 1.5rem/1.25 var(--serif); margin: 0 0 4px; }
+.code { color: var(--muted); font-size: .875rem; margin: 0 0 16px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin: 0 0 20px; }
+.tile b { display: block; font: 600 1.6rem/1.1 var(--serif); font-variant-numeric: tabular-nums; }
+.tile span { color: var(--muted); font-size: .85rem; }
+.chart { position: relative; }
+.chart h3, article h3 { font: 600 .95rem var(--sans); margin: 20px 0 6px; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--muted); font: 12px var(--sans); }
+.tip { position: absolute; pointer-events: none; background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 8px;
+  font-size: .8rem; box-shadow: 0 2px 8px rgba(0,0,0,.12); display: none; white-space: nowrap; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.rows { list-style: none; padding: 0; margin: 0; font-size: .9rem; }
+.rows li { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--grid); }
+.rows li.head span { font-size: .75rem; }
+.rows li span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+.note { color: var(--muted); font-size: .85rem; margin: 10px 0 0; }
+table { border-collapse: collapse; font-size: .85rem; margin-top: 8px; }
+th, td { padding: 4px 12px 4px 0; text-align: right; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+th:first-child, td:first-child { text-align: left; }
+summary { cursor: pointer; color: var(--stamp); font-size: .9rem; margin-top: 10px; width: fit-content; }
+table.tx { width: 100%; border-collapse: collapse; font-size: .9rem; margin: 0; }
+table.tx th { text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; padding: 0 8px 6px 0; border-bottom: 1px solid var(--rule); }
+table.tx td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--grid); vertical-align: middle; }
+table.tx .r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.tx td.zv { min-width: 9.5rem; }
+.bar { display: inline-block; position: relative; width: 4.5rem; height: 6px; background: var(--grid); border-radius: 3px; margin-right: 8px; vertical-align: middle; }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); border-radius: 3px; }
+.bar b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--stamp); }
+footer { margin-top: 56px; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--rule); padding-top: 12px; }
+@media (max-width: 560px) { h1 { font-size: 1.9rem; } .two { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <p style="margin:0 0 28px"><a href="index.html" style="font:800 1.4rem/1 var(--serif);color:var(--ink);text-decoration:none">Místník</a> <a href="index.html" style="margin-left:12px">← obce</a></p>
+  <h1>Povolání kandidátů</h1>
+  <p class="lede">Co kandidáti do obecních zastupitelstev uvádějí jako povolání, sjednocené do srozumitelných oborů. Advokát, právník i advokátka tak patří do stejné skupiny. Obory vycházejí z Klasifikace zaměstnání CZ-ISCO. Kdo místo povolání uvedl postavení (důchodce, student, podnikatel bez oboru) nebo veřejnou funkci, je ve zvláštních skupinách na konci. Volby 2002 až 2026.</p>
+  <label for="q" class="code">Hledat povolání nebo skupinu</label>
+  <input id="q" type="search" placeholder="například učitel, lékař, zemědělec" autocomplete="off">
+  <div id="index"></div>
+  <div id="cards"></div>
+  <footer>Zdroj: ČSÚ, kandidátní listiny 2002–2026; klasifikace CZ-ISCO. 5 000 nejčastějších zápisů zařadil model Jev, zkontroloval je druhý model (Gemini) a sporné případy ručně upravujeme. Řidší zápisy jsou zařazeny podle klíčových slov ze zápisů už zařazených. Místník připravil Jan Antonín Kolář.</footer>
+</main>
+<script>
+const cards = __DATA__;
+const pct = x => x == null ? "–" : (x * 100).toLocaleString("cs-CZ", {maximumFractionDigits: 1}) + " %";
+const num = x => x.toLocaleString("cs-CZ");
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const slug = c => "s-" + (c.name || "nezarazeno").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+function chart(c) {
+  const W = 560, H = 150, padL = 44, padB = 22, bw = 24, ys = c.years;
+  const max = Math.max(...ys.map(y => y.n)) || 1;
+  const step = Math.pow(10, Math.floor(Math.log10(max)));
+  const top = Math.ceil(max / step) * step;
+  const x = i => padL + (i + .5) * (W - padL) / ys.length;
+  const y = v => (H - padB) * (1 - v / top);
+  const grid = [0, top / 2, top].map(v => `<line x1="${padL}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/>
+    <text x="${padL - 6}" y="${y(v) + 4}" text-anchor="end">${num(v)}</text>`).join("");
+  const bars = ys.map((d, i) => {
+    const h = (H - padB) - y(d.n), r = Math.min(4, h);
+    const x0 = x(i) - bw / 2, y0 = y(d.n);
+    const path = h > 0 ? `M${x0},${H - padB} V${y0 + r} Q${x0},${y0} ${x0 + r},${y0} H${x0 + bw - r} Q${x0 + bw},${y0} ${x0 + bw},${y0 + r} V${H - padB} Z` : "";
+    const label = `${d.y}: ${num(d.n)} kandidatur, ${pct(d.share)} všech` + (d.rate != null ? `, zvoleno ${pct(d.rate)} (průměr ${pct(d.base)})` : ", volby probíhají");
+    return `<path d="${path}" fill="var(--bar)"/><rect class="hit" x="${x0 - 8}" y="0" width="${bw + 16}" height="${H - padB}" fill="transparent" tabindex="0" aria-label="${label}" data-tip="${label}"/>
+      <text x="${x(i)}" y="${H - 6}" text-anchor="middle">${d.y}</text>`;
+  }).join("");
+  const last = ys.at(-1);
+  return `<div class="chart"><h3>Počet kandidatur podle voleb</h3>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Počet kandidatur ve skupině ${esc(c.name)} podle voleb">${grid}${bars}
+    <text x="${x(ys.length - 1)}" y="${y(last.n) - 6}" text-anchor="middle" style="fill:var(--ink)">${num(last.n)}</text></svg><div class="tip"></div></div>`;
+}
+
+function card(c) {
+  const rateTxt = c.rate == null ? "–" : pct(c.rate);
+  const diff = c.rate == null ? "" : c.rate > c.base * 1.15 ? "častěji než průměr" : c.rate < c.base * .85 ? "méně často než průměr" : "zhruba jako průměr";
+  const table = `<details><summary>Tabulka po volbách</summary><table><thead><tr><th>Volby</th><th>Kandidatur</th><th>Podíl</th><th>Zvoleno</th><th>Průměr zvolených</th></tr></thead><tbody>
+    ${c.years.map(d => `<tr><td>${d.y}</td><td>${num(d.n)}</td><td>${pct(d.share)}</td><td>${pct(d.rate)}</td><td>${pct(d.base)}</td></tr>`).join("")}</tbody></table></details>`;
+  return `<article id="${slug(c)}" data-search="${esc((c.name + " " + c.texts.map(t => t[0]).join(" ")).toLowerCase())}">
+    <h2>${esc(c.name)}</h2><p class="code">${num(c.variants)} různých zápisů povolání</p>
+    <div class="tiles">
+      <div class="tile"><b>${num(c.n)}</b><span>kandidatur 2002–2026</span></div>
+      <div class="tile"><b>${rateTxt}</b><span>zvolených v letech 2002–2022, ${diff} (${pct(c.base)})</span></div>
+      <div class="tile"><b>${c.age ?? "–"}</b><span>let, medián věku</span></div>
+      <div class="tile"><b>${pct(c.bezpp)}</b><span>bez politické příslušnosti</span></div>
+    </div>
+    ${chart(c)}${table}
+    <div class="two">
+      <div><h3>Jak to kandidáti píšou</h3>
+        <table class="tx"><thead><tr><th>Zápis povolání</th><th class="r">Kandidatur</th><th class="r">Zvoleno</th></tr></thead><tbody>
+        ${c.texts.map(([t, n, r]) => `<tr><td>${esc(t || "(neuvedeno)")}</td><td class="r">${num(n)}</td>
+          <td class="r zv">${r == null ? "–" : `<span class="bar" aria-hidden="true"><i style="width:${Math.min(100, r * 100)}%"></i><b style="left:${c.base * 100}%"></b></span>${pct(r)}`}</td></tr>`).join("")}
+        </tbody></table>
+        <p class="note">Zvoleno: kolik procent kandidatur v letech 2002–2022 skončilo zvolením. Svislá čárka je průměr všech kandidátů (${pct(c.base)}).</p></div>
+      <div><h3>Věk</h3><ul class="rows">${["do 30", "30–44", "45–59", "60 a více"].map((l, k) => `<li><span>${l} let</span><span>${pct(c.ages[k] / c.n)}</span></li>`).join("")}</ul>
+        <h3>Velikost obce</h3><ul class="rows">${c.sizes.map(([l, s]) => `<li><span>${l} obyvatel</span><span>${pct(s)}</span></li>`).join("")}</ul>
+        ${c.parties.length ? `<h3>Členové stran</h3><ul class="rows">${c.parties.map(([p, n]) => `<li><span>${esc(p)}</span><span>${num(n)}</span></li>`).join("")}</ul>` : ""}</div>
+    </div>
+    ${c.note ? `<p class="note">${esc(c.note)}</p>` : ""}
+    ${c.kw > .1 ? `<p class="note">${pct(c.kw)} kandidatur v této skupině jsou řídké zápisy zařazené automaticky podle klíčových slov (například „ředitelka zvš“ podle známého zápisu „ředitelka“); u nich je zařazení méně jisté.</p>` : ""}
+    ${c.func > .05 ? `<p class="note">${pct(c.func)} zápisů zmiňuje veřejnou funkci (starosta, radní a podobně).</p>` : ""}
+  </article>`;
+}
+
+const sections = [["group", "Obory"], ["status", "Postavení a funkce místo oboru"], ["none", "Bez určitelného oboru"]];
+document.getElementById("index").innerHTML = sections.map(([k, h]) => `<p class="index-h">${h}</p><ul class="index">` + cards.filter(c => c.kind === k).map(c =>
+  `<li data-search="${esc((c.name + " " + c.texts.map(t => t[0]).join(" ")).toLowerCase())}"><a href="#${slug(c)}">${esc(c.name)}</a><span>${num(c.n)}</span></li>`).join("") + "</ul>").join("");
+document.getElementById("cards").innerHTML = cards.map(card).join("");
+
+document.querySelectorAll(".chart").forEach(ch => {
+  const tip = ch.querySelector(".tip");
+  const show = (el, ev) => {
+    tip.textContent = el.dataset.tip; tip.style.display = "block";
+    const box = ch.getBoundingClientRect(), r = el.getBoundingClientRect();
+    tip.style.left = Math.min(r.left - box.left, box.width - tip.offsetWidth) + "px"; tip.style.top = (r.top - box.top + 4) + "px";
+  };
+  ch.querySelectorAll(".hit").forEach(el => {
+    el.addEventListener("mouseenter", e => show(el, e)); el.addEventListener("focus", e => show(el, e));
+    el.addEventListener("mouseleave", () => tip.style.display = "none"); el.addEventListener("blur", () => tip.style.display = "none");
+  });
+});
+const q = document.getElementById("q");
+q.addEventListener("input", () => {
+  const v = q.value.trim().toLowerCase();
+  document.querySelectorAll("[data-search]").forEach(el => el.hidden = v && !el.dataset.search.includes(v));
+});
+</script>
+</body>
+</html>

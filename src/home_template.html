@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Kandidátky komunálních voleb 2026 ve všech obcích a historie kandidátů od roku 2002: kdo kandiduje, kdo kandidoval a kam přešel.">
+<title>Místník – kdo kandiduje a kdo kandidoval</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --paper: #f5f6f4; --ink: #17202a; --muted: #5a626d; --rule: #d7dad8; --grid: #e8eae7; --accent: #424b00; --hover: #ebede6;
+  --serif: "Literata", Georgia, serif; --sans: "Public Sans", system-ui, sans-serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --grid: #23272e; --accent: #b3c075; --hover: #1e2228; } }
+:root[data-theme="dark"] { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --grid: #23272e; --accent: #b3c075; --hover: #1e2228; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--sans); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main { max-width: 1080px; margin: 0 auto; padding: 56px clamp(16px, 3vw, 40px) 80px; }
+.wm { font: 800 clamp(3.2rem, 11vw, 6rem)/1 var(--serif); letter-spacing: -.02em; display: inline-flex; margin: 0; }
+.wm .i { position: relative; } .wm .i::after { content: ""; position: absolute; left: 50%; bottom: .8em; width: .13em; height: .4em;
+  background: var(--ink); transform: translateX(-30%) rotate(32deg); transform-origin: bottom center; }
+.claim { font: 400 clamp(1.25rem, 3vw, 1.6rem)/1.3 var(--serif); margin: 12px 0 6px; }
+.sub { color: var(--muted); max-width: 60ch; margin: 0 0 32px; }
+.search { max-width: 720px; }
+label { display: block; font-weight: 600; margin-bottom: 6px; }
+input { width: 100%; font: inherit; font-size: 1.2rem; padding: 16px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); color: var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.chips a { text-decoration: none; color: var(--ink); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 12px; font-size: .9rem; }
+.chips a:hover { background: var(--hover); }
+ul.res { list-style: none; padding: 0; margin: 12px 0 0; max-width: 720px; }
+.res li a { display: flex; justify-content: space-between; gap: 12px; padding: 10px 4px; border-bottom: 1px solid var(--grid); color: var(--ink); text-decoration: none; }
+.res li a:hover { background: var(--hover); }
+.res li span { color: var(--muted); font-size: .9rem; white-space: nowrap; }
+.note { color: var(--muted); font-size: .9rem; margin-top: 8px; }
+h2 { font: 600 1.35rem var(--serif); margin: 0 0 12px; }
+section.block { margin-top: 64px; padding-top: 20px; border-top: 2px solid var(--ink); }
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 24px; }
+.nums b { display: block; font: 600 clamp(1.8rem, 4vw, 2.4rem)/1.05 var(--serif); font-variant-numeric: tabular-nums; }
+.nums span { color: var(--muted); font-size: .9rem; }
+.three { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; }
+.three h3 { font: 600 1rem var(--sans); margin: 0 0 8px; }
+.rows { list-style: none; padding: 0; margin: 0; font-size: .92rem; }
+.rows li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--grid); }
+.rows li a { color: var(--ink); text-decoration: none; }
+.rows li a:hover { text-decoration: underline; }
+.rows li span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.how { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+.how p { margin: 4px 0 0; color: var(--muted); }
+.how strong { font: 600 1.05rem var(--serif); }
+footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px) 32px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--rule); }
+</style>
+</head>
+<body>
+<main>
+  <p class="wm">M<span class="i">ı</span>stník</p>
+  <p class="claim">Kdo kandiduje. A kdo kandidoval.</p>
+  <p class="sub">Kandidátky komunálních voleb 2026 ve všech obcích a městských částech. U každého kandidáta jeho dřívější kandidatury od roku 2002, za koho kandidoval a kam přešel.</p>
+
+  <div class="search">
+    <label for="q">Najděte obec, městskou část nebo kandidáta</label>
+    <input id="q" type="search" placeholder="například Hnojice, Praha 7 nebo příjmení kandidáta" autocomplete="off" autofocus>
+    <div class="chips" id="big"></div>
+    <p class="note" id="count"></p>
+  </div>
+  <ul class="res" id="res"></ul>
+  <h2 id="ph" hidden style="font:600 1rem var(--sans);margin:24px 0 0">Kandidáti 2026</h2>
+  <ul class="res" id="people"></ul>
+
+  <section class="block">
+    <h2>Volby 2026 v číslech</h2>
+    <div class="nums" id="nums"></div>
+  </section>
+
+  <section class="block">
+    <h2>Zajímavosti</h2>
+    <div class="three" id="facts"></div>
+  </section>
+
+  <section class="block">
+    <h2>Koho voliči volí</h2>
+    <p class="sub" id="occsub"></p>
+    <div class="three" id="occ"></div>
+  </section>
+
+  <section class="block">
+    <h2>Co tu najdete</h2>
+    <div class="how">
+      <div><strong>Kandidátky jako na lístku</strong><p>Všechny kandidátky obce vedle sebe v oficiálním pořadí, s věkem, složením a tím, kdo kandiduje znovu.</p></div>
+      <div><strong>Historie od roku 2002</strong><p>Kolikrát člověk kandidoval, kdy byl zvolen, kolik dostal hlasů a jestli ho voliči posunuli.</p></div>
+      <div><strong>Přesuny mezi kandidátkami</strong><p>Kdo zůstal u své kandidátky, kdo přešel jinam a kdo je v obci nový.</p></div>
+      <div><strong>Povolání kandidátů</strong><p>Jaké obory kandidují a jak často jsou zvoleni. <a href="povolani.html">Prohlédnout povolání</a></p></div>
+    </div>
+  </section>
+</main>
+<footer>Zdroj: Český statistický úřad, kandidátní listiny 2002–2026. Historie je odvozená naším párováním a může obsahovat chyby, <a href="metodika.html">jak to počítáme</a>, <a href="data.html">otevřená data</a>. Chyba nebo námitka: <a href="mailto:opravy@mistnik.cz">opravy@mistnik.cz</a>. Místník připravil Jan Antonín Kolář.</footer>
+<script>
+const idx = __INDEX__;  // [kod, nazev, okres, kandidatu, s_historii]
+const S = __STATS__;
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const num = x => Number(x).toLocaleString("cs-CZ");
+const pct = (a, b) => Math.round(100 * a / b) + " %";
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+document.getElementById("big").innerHTML = S.big.map(([k, n]) => `<a href="obec/${k}.html">${esc(n)}</a>`).join("");
+document.getElementById("nums").innerHTML = [
+  [num(S.councils), "obcí a městských částí"], [num(S.lists), "kandidátek"], [num(S.cands), "kandidátů"],
+  [pct(S.women, S.women + S.men), "žen mezi kandidáty"], [pct(S.again, S.cands), "kandidovalo už dříve"],
+  [pct(S.inc, S.e22), "zvolených v roce 2022 kandiduje znovu"], [num(S.long), "kandiduje od roku 2010 nebo dřív"],
+].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
+const row = r => `<li><a href="obec/${r[4]}.html">${esc(r[2])}, ${esc(r[3])}</a><span>medián ${String(r[0]).replace(".", ",")} let</span></li>`;
+document.getElementById("facts").innerHTML = `
+  <div><h3>Nejmladší kandidátky</h3><ul class="rows">${S.young.map(row).join("")}</ul></div>
+  <div><h3>Nejstarší kandidátky</h3><ul class="rows">${S.old.map(row).join("")}</ul></div>
+  <div><h3>Nejvíc kandidátek</h3><ul class="rows">${S.most_lists.map(r => `<li><a href="obec/${r[2]}.html">${esc(r[1])}</a><span>${r[0]} kandidátek</span></li>`).join("")}</ul></div>
+  <p class="note" style="grid-column:1/-1">Věk: kandidátky s aspoň 10 kandidáty.</p>`;
+
+const O = S.occ, slug = c => "s-" + c.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+const orow = r => `<li><a href="povolani.html#${slug(r[3])}">${esc(r[0])}</a><span>${Math.round(r[2] * 100)} % zvoleno z ${num(r[1])}</span></li>`;
+document.getElementById("occsub").textContent = `Podíl zvolených podle povolání, které kandidáti uvedli, ve volbách 2002–2022. Průměr všech kandidátů je ${Math.round(O.base * 100)} %.`;
+document.getElementById("occ").innerHTML = `
+  <div><h3>Nejčastěji zvolení</h3><ul class="rows">${O.top.map(orow).join("")}</ul></div>
+  <div><h3>Nejméně často zvolení</h3><ul class="rows">${O.bottom.map(orow).join("")}</ul></div>
+  <p class="note" style="grid-column:1/-1">Jen povolání s aspoň ${num(O.min)} kandidaturami, bez veřejných funkcí jako starosta. Část rozdílů dělá velikost obce: v malých obcích bývá zvolená větší část kandidátů, a tam je víc zemědělců.</p>`;
+
+const keyed = idx.map(r => [norm(r[1] + " " + r[2]), r]);
+const q = document.getElementById("q"), res = document.getElementById("res"), cnt = document.getElementById("count");
+function show() {
+  const v = norm(q.value.trim());
+  const hits = v.length < 2 ? [] : keyed.filter(([k]) => k.includes(v)).map(([, r]) => r)
+    .sort((a, b) => (norm(a[1]).startsWith(v) ? 0 : 1) - (norm(b[1]).startsWith(v) ? 0 : 1)).slice(0, 40);
+  cnt.textContent = v.length < 2 ? "" : hits.length ? "" : "Obec nenalezena. Zkuste jiný tvar názvu.";
+  res.innerHTML = hits.map(r => `<li><a href="obec/${r[0]}.html"><strong>${esc(r[1])}</strong><span>${esc(r[2])}, ${num(r[3])} kandidátů</span></a></li>`).join("");
+}
+const shardCache = {};
+async function shard(k) {
+  if (!(k in shardCache)) shardCache[k] = fetch(`hledat/${encodeURIComponent(k.replace(/ /g, "_"))}.json`).then(r => r.ok ? r.json() : []).catch(() => []);
+  return shardCache[k];
+}
+const ppl = document.getElementById("people"), ph = document.getElementById("ph");
+async function showPeople() {
+  const v = norm(q.value.trim()).replace(/[-‐–\s]+/g, " ");
+  if (v.length < 3) { ppl.innerHTML = ""; ph.hidden = true; return; }
+  const words = v.split(" ");
+  const rows = (await Promise.all(words.map(w => shard(w.slice(0, 2))))).flat();
+  if (norm(q.value.trim()).replace(/[-‐–\s]+/g, " ") !== v) return;  // a newer query is already running
+  const seen = new Set(), all = rows.filter(r => words.every(w => r[6].includes(w)) && !seen.has(r[4]) && seen.add(r[4]));
+  const hits = all.slice(0, 30);
+  ph.hidden = !hits.length;
+  ph.textContent = all.length > 30 ? `Kandidáti 2026: prvních 30 z ${all.length}, upřesněte hledání (třeba přidejte obec)` : "Kandidáti 2026";
+  ppl.innerHTML = hits.map(r => `<li><a href="obec/${r[3]}.html#${encodeURIComponent(r[4])}"><strong>${esc(r[0])}, ${r[1]}</strong>
+    <span>${esc(r[2])}${r[5] ? `, dříve kandidoval/a ${r[5]}×` : ""}</span></a></li>`).join("");
+}
+q.addEventListener("input", () => { show(); showPeople(); });
+</script>
+</body>
+</html>
