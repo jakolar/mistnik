@@ -109,9 +109,10 @@ body.moves .mv { display: block; }
 .nk h2 { font: 600 1.2rem var(--serif); border-top: 3px solid var(--ink); padding-top: 10px; }
 .legend { font-size: .8rem; color: var(--muted); margin-top: 28px; }
 dialog { border: 0; padding: 0; max-width: 760px; width: calc(100% - 24px); background: var(--paper); color: var(--ink); border-radius: 6px; }
+.claim-m { display: none; margin: 2px 0 0; color: var(--muted); font: 400 1rem var(--serif); }
 dialog::backdrop { background: rgba(10, 12, 16, .45); }
 .prof { padding: 22px 22px 28px; }
-.prof .close { float: right; font: inherit; border: 1px solid var(--rule); background: none; color: var(--ink); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.prof .close { position: sticky; top: 8px; z-index: 1; float: right; font: inherit; border: 1px solid var(--rule); background: none; color: var(--ink); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
 .prof h2 { font: 600 1.8rem/1.15 var(--serif); margin: 0 0 4px; }
 .prof .sub { color: var(--muted); margin: 0 0 16px; }
 .figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 0 0 16px; }
@@ -138,19 +139,27 @@ footer { max-width: none; margin: 0 auto; padding: 16px; color: var(--muted); fo
   td.opt, th.opt { display: none; }
   .top small { display: none; }
   .top nav { gap: 12px !important; }
-  .flowsvg { display: none; }  /* the per-list sentences below carry the same numbers on a phone */
+  .flowsvg, .flowonly, .legend-top { display: none; }
+  .claim-m { display: block; }
+  .hl { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+  .hl button { white-space: nowrap; flex: none; }
+  dialog { width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; border-radius: 0; }
+  .prof .close { min-height: 40px; padding: 6px 14px; background: var(--paper); }
+  svg.vchart { font-size: 19px !important; }
+  .top nav a { white-space: nowrap; }  /* the per-list sentences below carry the same numbers on a phone */
 }
 </style>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="8f55e5f8-357f-47e8-be76-361a77bfe9da"></script>
 </head>
 <body>
 <div class="top"><div><a class="wm" href="../index.html">M<span class="i">ı</span>stník</a><small>Kdo kandiduje. A kdo kandidoval.</small>
-  <nav style="margin-left:auto;display:flex;gap:16px;font-size:.9rem"><a href="../index.html">Obce</a><a href="../povolani.html">Povolání</a><a href="../metodika.html">Jak to počítám</a></nav></div></div>
+  <nav style="margin-left:auto;display:flex;gap:16px;font-size:.9rem"><a href="../index.html">Obce</a><a href="../povolani.html">Povolání</a><a href="../metodika.html">Metodika</a></nav></div></div>
 <main>
   <p class="kicker">Komunální volby 2026</p>
   <h1>__TOWN__</h1>
+  <p class="claim-m">Kdo kandiduje. A kdo kandidoval.</p>
   <section class="council" id="council">__STATIC_SUMMARY__</section>
-  <p class="legend" style="margin:12px 0 0"><span class="dots" aria-hidden="true"><i class="won"></i><i></i><i class="none"></i></span>Tečky = volby 2002 až 2026: plná zvolen, prázdná kandidoval, tečkovaná nekandidoval.</p>
+  <p class="legend legend-top" style="margin:12px 0 0"><span class="dots" aria-hidden="true"><i class="won"></i><i></i><i class="none"></i></span>Tečky = volby 2002 až 2026: plná zvolen, prázdná kandidoval, tečkovaná nekandidoval.</p>
   <div class="hl" role="group" aria-label="Zvýraznit kandidáty">
     <span>Zvýraznit:</span>
     <button type="button" data-hl="" aria-pressed="true">Všichni</button>
@@ -394,7 +403,7 @@ function flowSvg() {
   const lab = (o, x, anchor) => [...o].map(([k, v]) => `<rect x="${anchor === "end" ? x - 4 : x}" y="${v.y}" width="4" height="${Math.max(v.h, 1)}" fill="var(--ink)"/>
     <text x="${anchor === "end" ? x - 8 : x + 8}" y="${v.y + v.h / 2 + 4}" text-anchor="${anchor}"><title>${esc(k)}: ${num(v.h / scale)}</title>${esc(k.length > 32 ? k.slice(0, 31) + "…" : k)} <tspan style="fill:var(--muted)">${Math.round(v.h / scale)}</tspan></text>`).join("");
 
-  return `<h3>Odkud kandidáti přišli</h3><p class="stats">Jen kandidáti, kteří už dříve kandidovali. Vlevo kde byli v roce 2022 v této obci, vpravo kandidátky 2026. Tmavé pásy jsou přesuny mezi kandidátkami, světlé setrvání. Číslo je počet lidí.</p>
+  return `<h3>Odkud kandidáti přišli</h3><p class="stats">Jen kandidáti, kteří už dříve kandidovali.<span class="flowonly"> Vlevo kde byli v roce 2022 v této obci, vpravo kandidátky 2026. Tmavé pásy jsou přesuny mezi kandidátkami, světlé setrvání. Číslo je počet lidí.</span></p>
     <div class="flowsvg"><svg viewBox="0 0 ${W} ${HH}" role="img" aria-label="Přesuny kandidátů mezi kandidátkami 2022 a 2026" style="width:100%;max-width:${W}px;height:auto">${bands}${lab(lp, x0, "end")}${lab(rp, x1, "start")}</svg></div>
     ${tables}`;
 }
@@ -438,7 +447,7 @@ function votesChart(p) {
     const delta = h.pos - h.vrank;
     const mv = delta > 0 ? `voliči ${f(p, "ho", "ji")} posunuli o ${delta} ${delta === 1 ? "místo" : delta < 5 ? "místa" : "míst"} nahoru` : delta < 0 ? `voliči ${f(p, "ho", "ji")} posunuli o ${-delta} ${-delta === 1 ? "místo" : -delta < 5 ? "místa" : "míst"} dolů` : "voliči pořadí potvrdili";
     return `<li><span>${h.year}</span><span>na kandidátce ${h.pos}., podle hlasů ${h.vrank}. z ${h.vn}: ${mv}${h.vshare == null ? "" : `; ${(Math.round(h.vshare * 1000) / 10).toLocaleString("cs-CZ")} % hlasů kandidátky`}${h.skip ? `, ${f(p, "zvolen", "zvolena")} díky preferenčním hlasům` : ""}</span></li>`; }).join("");
-  return `<h3>Hlasy ve volbách</h3><svg viewBox="0 0 ${W} ${H + 18}" role="img" aria-label="Počet hlasů v jednotlivých volbách" style="width:100%;height:auto;overflow:visible;font:12px var(--sans);fill:var(--muted)">${bars}</svg>
+  return `<h3>Hlasy ve volbách</h3><svg viewBox="0 0 ${W} ${H + 18}" role="img" class="vchart" aria-label="Počet hlasů v jednotlivých volbách" style="width:100%;height:auto;overflow:visible;font:12px var(--sans);fill:var(--muted)">${bars}</svg>
     <p class="note">Tmavý sloupec: zvolen. Hlasy nejsou srovnatelné mezi obcemi různé velikosti, důležitější je pořadí na kandidátce.</p>
     <ul class="why">${moves}</ul>`;
 }

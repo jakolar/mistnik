@@ -246,7 +246,7 @@ function show() {
   const tier = r => { const n = norm(r[1]); return n.startsWith(v) ? 0 : n.includes(v) ? 1 : 2; };  // 2 = only the district matches
   const hits = v.length < 2 ? [] : keyed.filter(([k]) => k.includes(v)).map(([, r]) => r)
     .sort((a, b) => tier(a) - tier(b) || b[3] - a[3]).slice(0, 40);
-  cnt.textContent = v.length < 2 ? "" : hits.length ? "" : "Obec nenalezena. Zkuste jiný tvar názvu.";
+  cnt.textContent = v.length < 2 || hits.length ? "" : "Obec tohoto jména jsem nenašel. Kandidáty hledám níže.";
   res.innerHTML = hits.map(r => `<li><a href="obec/${r[0]}.html"><strong>${esc(r[1])}</strong><span>${esc(r[2])}, ${num(r[3])} kandidátů</span></a></li>`).join("");
 }
 const shardCache = {};
