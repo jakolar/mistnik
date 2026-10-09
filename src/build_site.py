@@ -174,6 +174,14 @@ def main():
     ages = b26.age.clip(upper=90)
     stats["age_hist"] = {"from": int(ages.min()), "n": [int(x) for x in ages.value_counts().sort_index().reindex(range(int(ages.min()), 91), fill_value=0)],
                          "mean": round(float(b26.age.mean()), 1), "median": float(b26.age.median())}  # 90 = 90 and older
+    # share of women per election, among candidates and among the elected (gender estimated from names; unknown left out)
+    gu = C[["JMENO", "PRIJMENI"]].drop_duplicates()
+    gu["g"] = [gender(a, b) for a, b in zip(gu.JMENO, gu.PRIJMENI)]
+    gw = C[["year", "JMENO", "PRIJMENI", "MANDAT"]].merge(gu, on=["JMENO", "PRIJMENI"])
+    gw = gw[gw.g.isin(["Z", "M"])]
+    stats["women_years"] = [[int(y), round(float((g.g == "Z").mean()), 4),
+                             round(float((g[g.MANDAT == "A"].g == "Z").mean()), 4) if (g.MANDAT == "A").any() else None]
+                            for y, g in gw.groupby("year")]
     stats["occ"] = json.load(open(ROOT / "data/derived/occ_groups.json", encoding="utf-8"))["rank"]
     stats["big"] = [[k, council_name.get(k, k)] for k in big if (SITE / "obec" / f"{k}.html").exists()]
     home = (ROOT / "src/home_template.html").read_text().replace("__INDEX__", js(index)).replace("__STATS__", js(stats))

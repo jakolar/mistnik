@@ -49,6 +49,8 @@ section.block { margin-top: 64px; padding-top: 20px; border-top: 2px solid var(-
 .rows li span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .showmore { margin-top: 8px; font: inherit; font-size: .9rem; background: none; border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; color: var(--ink); cursor: pointer; }
 .showmore:hover { background: var(--hover); }
+.leg span { display: inline-block; width: 12px; height: 3px; margin: 0 6px 3px 12px; vertical-align: middle; }
+.leg span:first-child { margin-left: 0; }
 .sub3 { font: 600 1rem var(--sans); margin: 28px 0 8px; }
 .ages { position: relative; max-width: 1000px; }
 .ages svg { width: 100%; height: auto; display: block; font: 13px var(--sans); fill: var(--muted); touch-action: pan-y; }
@@ -78,8 +80,11 @@ footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px)
   <section class="block">
     <h2>Volby 2026 v číslech</h2>
     <div class="nums" id="nums"></div>
+    <p class="note">Čísla o dřívějších kandidaturách jsou spíš dolní odhad. Kandidatury spojujeme jen tam, kde jsme si jistí: zhruba u 4 % kandidátů (asi 7 500 lidí) existuje možné spojení s dřívější kandidaturou, které jsme nepotvrdili a nezobrazujeme. Nespojíme ani kandidáty, kteří změnili příjmení, typicky po sňatku. <a href="metodika.html">Jak to počítáme</a></p>
     <h3 class="sub3">Věk kandidátů</h3>
     <div id="ages" class="ages"></div>
+    <h3 class="sub3">Podíl žen</h3>
+    <div id="women" class="ages"></div>
   </section>
 
   <section class="block">
@@ -144,6 +149,24 @@ document.getElementById("nums").innerHTML = [
     tip.style.left = Math.min(r.width - 160, Math.max(0, x(i) / W * r.width - 60)) + "px";
   });
   svg.addEventListener("pointerleave", () => { tip.hidden = true; cur.style.display = "none"; });
+})();
+// share of women 2002-2026: candidates vs elected; two series, so a legend plus direct labels at the line ends
+(() => {
+  const D = S.women_years, W = 1000, H = 230, pl = 44, pr = 150, pt = 16, pb = 26, top = .5;
+  const x = i => pl + i * (W - pl - pr) / (D.length - 1), y = v => pt + (H - pt - pb) * (1 - v / top);
+  const p = v => String(Math.round(v * 1000) / 10).replace(".", ",") + " %";
+  const series = [[1, "kandidáti", "var(--accent)"], [2, "zvolení", "var(--ink)"]];
+  const grid = [0, .1, .2, .3, .4, .5].map(v => `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${pl - 8}" y="${y(v) + 4}" text-anchor="end">${v * 100} %</text>`).join("");
+  const lines = series.map(([k, name, col]) => {
+    const pts = D.map((d, i) => d[k] == null ? null : [x(i), y(d[k]), d]).filter(Boolean), last = pts.at(-1);
+    return `<path d="${pts.map((q, i) => (i ? "L" : "M") + q[0] + "," + q[1]).join("")}" fill="none" stroke="${col}" stroke-width="2"/>`
+      + pts.map(([cx, cy, d]) => `<circle cx="${cx}" cy="${cy}" r="5" fill="${col}" stroke="var(--paper)" stroke-width="2"><title>${d[0]}, ${name}: ${p(d[k])} žen</title></circle>`).join("")
+      + `<text x="${last[0] + 12}" y="${last[1] + 4}" style="fill:var(--ink)">${name} ${p(last[2][k])}</text>`;
+  }).join("");
+  const xs = D.map((d, i) => `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${d[0]}</text>`).join("");
+  document.getElementById("women").innerHTML = `<p class="note leg"><span style="background:var(--accent)"></span>mezi kandidáty <span style="background:var(--ink)"></span>mezi zvolenými</p>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Podíl žen mezi kandidáty a zvolenými 2002 až 2026">${grid}${lines}${xs}</svg>
+    <p class="note">Pohlaví odhadujeme z křestního jména a tvaru příjmení; kde to nejde určit, kandidáta nepočítáme. Zvolení 2026 budou známi po sečtení.</p>`;
 })();
 const row = r => `<li><a href="obec/${r[4]}.html">${esc(r[2])}, ${esc(r[3])}</a><span>průměr ${String(r[0]).replace(".", ",")} let</span></li>`;
 document.getElementById("facts").innerHTML = `
