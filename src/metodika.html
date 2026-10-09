@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Místník – jak to počítáme</title>
+<title>Místník – jak to počítám</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -23,50 +23,50 @@ p, li { max-width: 66ch; }
 <body>
 <main>
   <a class="back" href="index.html">← Místník</a>
-  <h1>Jak to počítáme</h1>
-  <p class="lead">Místník ukazuje kandidátky komunálních voleb 2026 a u kandidátů jejich dřívější kandidatury od roku 2002. Kandidátky jsou oficiální údaje. Historie je náš odhad, který může obsahovat chyby.</p>
+  <h1>Jak to počítám</h1>
+  <p class="lead">Místník ukazuje kandidátky komunálních voleb 2026 a u kandidátů jejich dřívější kandidatury od roku 2002. Kandidátky jsou oficiální údaje. Historie je můj odhad, který může obsahovat chyby.</p>
 
   <h2>Zdroje</h2>
-  <p>Kandidátní listiny a výsledky komunálních voleb 2002, 2006, 2010, 2014, 2018 a 2022 a registr kandidátů 2026 (stav k 7. 10. 2026) z otevřených dat Českého statistického úřadu (volby.gov.cz). Data ČSÚ jsou pod licencí <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">CC BY 4.0</a>; vše, co z nich počítáme (spojení osob, přesuny, statistiky), jsou odvozené údaje, ne oficiální statistika ČSÚ. Četnosti jmen a příjmení z evidence obyvatel Ministerstva vnitra (stav leden 2017) a úmrtnostní tabulky ČSÚ používáme jen uvnitř výpočtu, nezveřejňujeme je.</p>
+  <p>Kandidátní listiny a výsledky komunálních voleb 2002, 2006, 2010, 2014, 2018 a 2022 a registr kandidátů 2026 (stav k 7. 10. 2026) z otevřených dat Českého statistického úřadu (volby.gov.cz). Data ČSÚ jsou pod licencí <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">CC BY 4.0</a>; vše, co z nich počítám (spojení osob, přesuny, statistiky), jsou odvozené údaje, ne oficiální statistika ČSÚ. Četnosti jmen a příjmení z evidence obyvatel Ministerstva vnitra (stav leden 2017) a úmrtnostní tabulky ČSÚ používám jen uvnitř výpočtu, nezveřejňuji je.</p>
 
-  <h2>Jak spojujeme kandidatury jednoho člověka</h2>
-  <p>Kandidáti v datech ČSÚ nemají žádný identifikátor, který by je spojoval mezi volbami. Dvě kandidatury proto považujeme za stejného člověka jen tehdy, když:</p>
+  <h2>Jak spojuji kandidatury jednoho člověka</h2>
+  <p>Kandidáti v datech ČSÚ nemají žádný identifikátor, který by je spojoval mezi volbami. Dvě kandidatury proto považuji za stejného člověka jen tehdy, když:</p>
   <ul>
     <li>mají stejné křestní jméno a příjmení,</li>
-    <li>věk v obou volbách odpovídá stejnému datu narození (z věku a data voleb počítáme interval narození; nesoulad spojení vylučuje),</li>
-    <li>kandidovali ve stejné obci, případně ve městě a jeho městské části. Spojení mezi různými obcemi děláme jen výjimečně, při velmi silné shodě.</li>
+    <li>věk v obou volbách odpovídá stejnému datu narození (z věku a data voleb počítám interval narození; nesoulad spojení vylučuje),</li>
+    <li>kandidovali ve stejné obci, případně ve městě a jeho městské části. Spojení mezi různými obcemi dělám jen výjimečně, při velmi silné shodě.</li>
   </ul>
-  <p>K tomu vážíme, jak je jméno vzácné (kolik lidí stejného jména a ročníku v Česku žije), a další shody: společné spolukandidáty, stejnou kandidátku nebo stranu, povolání, tituly a bydliště. Ve velkých městech a tam, kde v obci kandiduje jmenovec jiného věku, vyžadujeme vždy ještě další shodu. Jeden člověk nemůže mít v jedných volbách dvě kandidatury (kromě souběhu za město a městskou část) a nové spojení musí sedět se všemi dosavadními kandidaturami téhož člověka.</p>
-  <p>Když pravidla nestačí, zeptáme se ještě jazykového modelu Jev. Ten dostane obě kandidatury s jejich údaji (kandidátka, pořadí, bydliště, povolání, tituly, společní spolukandidáti, jak časté je jméno mezi kandidáty) a odhadne, jestli jde o stejného člověka. Věk ani výsledek voleb mu neukazujeme. Spojení na jeho radu přijmeme jen tehdy, když vychází vysoko i náš výpočet a je tu další shoda. Sám o spojení nerozhoduje.</p>
-  <p>U každého spojení uvádíme důvody a odhad jistoty. Odhad jistoty je výpočet našeho modelu, ne ověřený fakt. Nejistá spojení nezveřejňujeme: kandidatury, u kterých si nejsme jistí, zobrazujeme jako samostatné. Týká se to zhruba 4 % letošních kandidátů (asi 7 500 lidí), nejčastěji ve velkých městech, mezi různými obcemi a tam, kde v obci kandiduje víc lidí stejného jména. Postupně je ověřujeme ručně na vzorcích a proti dalším zdrojům. Raději historii nezobrazíme, než abychom někomu přiřadili cizí.</p>
-  <p>Štítek „nováček v obci“ znamená, že jsme v dané obci od roku 2002 dřívější kandidaturu nenašli. Pokud v obci dříve kandidoval jmenovec podobného věku, kterého jsme za stejného člověka nepotvrdili, štítek nedáváme a uvádíme to.</p>
+  <p>K tomu vážím, jak je jméno vzácné (kolik lidí stejného jména a ročníku v Česku žije), a další shody: společné spolukandidáty, stejnou kandidátku nebo stranu, povolání, tituly a bydliště. Ve velkých městech a tam, kde v obci kandiduje jmenovec jiného věku, vyžaduji vždy ještě další shodu. Jeden člověk nemůže mít v jedných volbách dvě kandidatury (kromě souběhu za město a městskou část) a nové spojení musí sedět se všemi dosavadními kandidaturami téhož člověka.</p>
+  <p>Když pravidla nestačí, zeptám se ještě jazykového modelu Jev. Ten dostane obě kandidatury s jejich údaji (kandidátka, pořadí, bydliště, povolání, tituly, společní spolukandidáti, jak časté je jméno mezi kandidáty) a odhadne, jestli jde o stejného člověka. Věk ani výsledek voleb mu neukazuji. Spojení na jeho radu přijmu jen tehdy, když vychází vysoko i můj výpočet a je tu další shoda. Sám o spojení nerozhoduje.</p>
+  <p>U každého spojení uvádím důvody a odhad jistoty. Odhad jistoty je výpočet mého modelu, ne ověřený fakt. Nejistá spojení nezveřejňuji: kandidatury, u kterých si nejsem jistý, zobrazuji jako samostatné. Týká se to zhruba 4 % letošních kandidátů (asi 7 500 lidí), nejčastěji ve velkých městech, mezi různými obcemi a tam, kde v obci kandiduje víc lidí stejného jména. Postupně je ověřuji ručně na vzorcích a proti dalším zdrojům. Raději historii nezobrazím, než abychom někomu přiřadili cizí.</p>
+  <p>Štítek „nováček v obci“ znamená, že jsem v dané obci od roku 2002 dřívější kandidaturu nenašel. Pokud v obci dříve kandidoval jmenovec podobného věku, kterého jsem za stejného člověka nepotvrdil, štítek nedávám a uvádím to.</p>
 
   <h2>Co znamenají údaje na stránce obce</h2>
   <ul>
     <li><strong>Zvolen/a 2022</strong>: kandidát byl v roce 2022 zvolen do zastupitelstva této obce.</li>
-    <li><strong>Kandiduje od roku …</strong>: kandidát má aspoň čtyři dřívější kandidatury, tedy v komunální politice je 16 a více let. Rok je první kandidatura, kterou jsme našli.</li>
-    <li><strong>Průměrný věk</strong> kandidátů na kandidátce. Pod ním uvádíme, kolik procent kandidátek v celé republice má průměrný věk vyšší, nebo nižší („mladší než 80 % kandidátek v ČR“).</li>
-    <li><strong>Přesuny od 2022</strong>: u kandidátů, kteří kandidovali i v roce 2022 ve stejné obci, ukazujeme, zda zůstali u své kandidátky, nebo přešli jinam. Za stejnou kandidátku považujeme i přejmenovanou kandidátku stejné strany nebo hnutí.</li>
-    <li><strong>Hlasy</strong>: počet preferenčních hlasů a pořadí podle hlasů na kandidátce. „Voliči posunuli nahoru“ znamená, že kandidát dostal víc hlasů, než odpovídalo jeho místu na listině. „Zvolen díky preferenčním hlasům“ uvádíme, jen když byl zvolen z místa, které by bez nich mandát nedostalo.</li>
+    <li><strong>Kandiduje od roku …</strong>: kandidát má aspoň čtyři dřívější kandidatury, tedy v komunální politice je 16 a více let. Rok je první kandidatura, kterou jsem našel.</li>
+    <li><strong>Průměrný věk</strong> kandidátů na kandidátce. Pod ním uvádím, kolik procent kandidátek v celé republice má průměrný věk vyšší, nebo nižší („mladší než 80 % kandidátek v ČR“).</li>
+    <li><strong>Přesuny od 2022</strong>: u kandidátů, kteří kandidovali i v roce 2022 ve stejné obci, ukazuji, zda zůstali u své kandidátky, nebo přešli jinam. Za stejnou kandidátku považuji i přejmenovanou kandidátku stejné strany nebo hnutí.</li>
+    <li><strong>Hlasy</strong>: počet preferenčních hlasů a pořadí podle hlasů na kandidátce. „Voliči posunuli nahoru“ znamená, že kandidát dostal víc hlasů, než odpovídalo jeho místu na listině. „Zvolen díky preferenčním hlasům“ uvádím, jen když byl zvolen z místa, které by bez nich mandát nedostalo.</li>
     <li><strong>Povolání</strong>: kolik kandidátů v republice uvádí stejný obor a jak často jsou zvoleni.</li>
   </ul>
 
-  <p>Všechna spojení včetně nejistých zveřejňujeme jako <a href="data.html">otevřená data</a>, aby si je mohl kdokoli zkontrolovat. Celý postup je ve <a href="https://github.com/jakolar/mistnik">zdrojovém kódu</a> na GitHubu.</p>
+  <p>Všechna spojení včetně nejistých zveřejňuji jako <a href="data.html">otevřená data</a>, aby si je mohl kdokoli zkontrolovat. Celý postup je ve <a href="https://github.com/jakolar/mistnik">zdrojovém kódu</a> na GitHubu.</p>
 
-  <h2>Co neumíme</h2>
+  <h2>Co neumím</h2>
   <ul>
-    <li>Spojit kandidatury po změně příjmení (typicky po sňatku). Zkoušíme to, ale taková spojení zatím nezobrazujeme. Proto netvrdíme, že někdo kandiduje poprvé, jen že jsme dřívější kandidaturu v obci nenašli.</li>
-    <li>Rozlišit dva lidi se stejným jménem a stejným rokem narození v jedné obci. Spojíme je, jen když to podporují další shody.</li>
-    <li>Opravit chybný věk v datech ČSÚ. Takové kandidatury nespojíme.</li>
+    <li>Spojit kandidatury po změně příjmení (typicky po sňatku). Zkouším to, ale taková spojení zatím nezobrazuji. Proto netvrdím, že někdo kandiduje poprvé, jen že jsem dřívější kandidaturu v obci nenašel.</li>
+    <li>Rozlišit dva lidi se stejným jménem a stejným rokem narození v jedné obci. Spojím je, jen když to podporují další shody.</li>
+    <li>Opravit chybný věk v datech ČSÚ. Takové kandidatury nespojím.</li>
     <li>Znát změny během volebního období. „Zvolen“ znamená zvolen ve volbách, ne že dotyčný mandát vykonával celé období.</li>
   </ul>
 
   <h2>Pohlaví a povolání</h2>
-  <p>Pohlaví ČSÚ neuvádí. Počty žen a mužů na kandidátce odhadujeme z křestního jména a tvaru příjmení. Kde to nejde určit, uvádíme „nezjištěno“. U jednotlivých lidí odhad používáme jen pro tvar slov (zvolen, zvolena). Povolání kandidátů jsou volný text; do oborů je třídíme podle Klasifikace zaměstnání CZ-ISCO pomocí jazykových modelů a ručně ověřených pravidel.</p>
+  <p>Pohlaví ČSÚ neuvádí. Počty žen a mužů na kandidátce odhaduji z křestního jména a tvaru příjmení. Kde to nejde určit, uvádím „nezjištěno“. U jednotlivých lidí odhad používám jen pro tvar slov (zvolen, zvolena). Povolání kandidátů jsou volný text; do oborů je třídím podle Klasifikace zaměstnání CZ-ISCO pomocí jazykových modelů a ručně ověřených pravidel.</p>
 
   <h2>Osobní údaje</h2>
-  <p>Zpracováváme údaje, které kandidáti uvedli na kandidátních listinách a které ČSÚ zveřejňuje. Činíme tak na základě oprávněného zájmu (čl. 6 odst. 1 písm. f GDPR) na informovanosti voličů o kandidátech do obecních zastupitelstev a o jejich dřívějším působení v komunální politice. Nezveřejňujeme adresy ani jiné údaje, které na kandidátních listinách nejsou. K posouzení sporných spojení a k třídění povolání posíláme údaje z kandidátních listin (jméno, rok voleb, obec, kandidátku, povolání, tituly) jazykovým modelům přes službu OpenRouter. Věk tam neposíláme. Návštěvnost webu měříme službou Umami bez cookies a bez ukládání IP adres; sledujeme jen souhrnné počty návštěv. Pokud nesouhlasíte se zpracováním svých údajů, našli jste chybu nebo chcete opravu, napište nám na <a href="mailto:__CONTACT__">__CONTACT__</a>. Odpovíme nejpozději do jednoho měsíce. Chybné spojení opravíme, na námitku údaje skryjeme a údaje, které ČSÚ přestane zveřejňovat, odstraníme.</p>
-  <p>Správce osobních údajů: __CONTROLLER__. Máte právo na přístup k údajům, jejich opravu, výmaz a omezení zpracování, právo vznést námitku a právo podat stížnost u Úřadu pro ochranu osobních údajů (uoou.gov.cz). Údaje zpracováváme po dobu, kdy jsou zveřejněné v otevřených datech ČSÚ.</p>
+  <p>Zpracovávám údaje, které kandidáti uvedli na kandidátních listinách a které ČSÚ zveřejňuje. Činím tak na základě oprávněného zájmu (čl. 6 odst. 1 písm. f GDPR) na informovanosti voličů o kandidátech do obecních zastupitelstev a o jejich dřívějším působení v komunální politice. Nezveřejňuji adresy ani jiné údaje, které na kandidátních listinách nejsou. K posouzení sporných spojení a k třídění povolání posílám údaje z kandidátních listin (jméno, rok voleb, obec, kandidátku, povolání, tituly) jazykovým modelům přes službu OpenRouter. Věk tam neposílám. Návštěvnost webu měřím službou Umami bez cookies a bez ukládání IP adres; sleduji jen souhrnné počty návštěv. Pokud nesouhlasíte se zpracováním svých údajů, našel jste chybu nebo chcete opravu, napište mi na <a href="mailto:__CONTACT__">__CONTACT__</a>. Odpovím nejpozději do jednoho měsíce. Chybné spojení opravím, na námitku údaje skryji a údaje, které ČSÚ přestane zveřejňovat, odstraním.</p>
+  <p>Správce osobních údajů: __CONTROLLER__. Máte právo na přístup k údajům, jejich opravu, výmaz a omezení zpracování, právo vznést námitku a právo podat stížnost u Úřadu pro ochranu osobních údajů (uoou.gov.cz). Údaje zpracovávám po dobu, kdy jsou zveřejněné v otevřených datech ČSÚ.</p>
 </main>
 </body>
 </html>

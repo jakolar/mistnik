@@ -136,7 +136,7 @@ footer { max-width: none; margin: 0 auto; padding: 16px; color: var(--muted); fo
 </head>
 <body>
 <div class="top"><div><a class="wm" href="../index.html">M<span class="i">ı</span>stník</a><small>Kdo kandiduje. A kdo kandidoval.</small>
-  <nav style="margin-left:auto;display:flex;gap:16px;font-size:.9rem"><a href="../index.html">Obce</a><a href="../povolani.html">Povolání</a><a href="../metodika.html">Jak to počítáme</a></nav></div></div>
+  <nav style="margin-left:auto;display:flex;gap:16px;font-size:.9rem"><a href="../index.html">Obce</a><a href="../povolani.html">Povolání</a><a href="../metodika.html">Jak to počítám</a></nav></div></div>
 <main>
   <p class="kicker">Komunální volby 2026</p>
   <h1>__TOWN__</h1>
@@ -158,9 +158,9 @@ footer { max-width: none; margin: 0 auto; padding: 16px; color: var(--muted); fo
     <span><button type="button" id="prev" aria-label="Předchozí kandidátky">← Předchozí</button><button type="button" id="next" aria-label="Další kandidátky">Další →</button></span></div>
   <div class="lists" id="lists" tabindex="0" aria-label="Kandidátky, posouvejte do strany"></div>
   <section class="nk" id="nk"></section>
-  <p class="legend">Tečky u kandidáta: volby 2002, 2006, 2010, 2014, 2018, 2022 a 2026. Plná tečka zvolen, prázdná kandidoval, tečkovaná nekandidoval. Historie zahrnuje jen spojení, která jsou podle nás jistá.</p>
+  <p class="legend">Tečky u kandidáta: volby 2002, 2006, 2010, 2014, 2018, 2022 a 2026. Plná tečka zvolen, prázdná kandidoval, tečkovaná nekandidoval. Historie zahrnuje jen spojení, která jsou podle mě jistá.</p>
 </main>
-<footer>Zdroj: Český statistický úřad, kandidátní listiny 2002–2026 (registr k 7. 10. 2026), <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">licence CC BY 4.0</a>. Historie kandidatur, přesuny a statistiky jsou odvozené údaje, ne oficiální statistika ČSÚ; historie vzniká naším párováním a může obsahovat chyby, <a href="../metodika.html">jak to počítáme</a>. Chyba nebo námitka: <a href="mailto:__CONTACT__">__CONTACT__</a>. Místník připravil Jan Antonín Kolář.</footer>
+<footer>Zdroj: Český statistický úřad, kandidátní listiny 2002–2026 (registr k 7. 10. 2026), <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">licence CC BY 4.0</a>. Historie kandidatur, přesuny a statistiky jsou odvozené údaje, ne oficiální statistika ČSÚ; historie vzniká mým párováním a může obsahovat chyby, <a href="../metodika.html">jak to počítám</a>. Chyba nebo námitka: <a href="mailto:__CONTACT__">__CONTACT__</a>. Místník připravil Jan Antonín Kolář.</footer>
 <dialog id="prof"><div class="prof" id="profBody"></div></dialog>
 <script>
 const people = __DATA__;
@@ -186,8 +186,8 @@ function runs(p) {
   return out;
 }
 function histLine(p) {
-  if (!p.ran && p.namesake) return `<span class="new">V obci dříve kandidoval jmenovec podobného věku, jako stejného člověka jsme ho nepotvrdili</span>`;
-  if (!p.ran) return p.rare ? `<span class="new">Dřívější kandidaturu v této obci od roku 2002 jsme nenašli</span>`
+  if (!p.ran && p.namesake) return `<span class="new">V obci dříve kandidoval jmenovec podobného věku, jako stejného člověka jsem ho nepotvrdil</span>`;
+  if (!p.ran) return p.rare ? `<span class="new">Dřívější kandidaturu v této obci od roku 2002 jsem nenašel</span>`
                             : "";
   const r = runs(p), same = r.length === 1;
   const last = p.history.filter(h => h.year !== "2026").at(-1).year;
@@ -251,7 +251,7 @@ function row(p) {
   const veteran = p.ran >= VETERAN;
   const badge = (p.incumbent ? `<span class="badge won">${f(p, "zvolen", "zvolena")} 2022</span>` : "")
     + (veteran ? `<span class="badge vet" title="Dříve kandidoval${p.female ? "a" : ""} ${p.ran}×, poprvé v roce ${p.since}">kandiduje od ${p.since}</span>` : "")
-    + (p.ran === 0 && !p.namesake ? `<span class="badge newb" title="Dřívější kandidaturu v této obci od roku 2002 jsme nenašli">${f(p, "nováček", "nováček")} v obci</span>` : "");
+    + (p.ran === 0 && !p.namesake ? `<span class="badge newb" title="Dřívější kandidaturu v této obci od roku 2002 jsem nenašel">${f(p, "nováček", "nováček")} v obci</span>` : "");
   const kind = p.ran === 0 && !p.namesake ? "new" : p.ran > 0 ? "again" : "unsure";
   return `<button class="row" type="button" data-id="${esc(p.id)}" data-kind="${kind}" data-won22="${p.incumbent ? 1 : 0}" data-vet="${p.ran >= VETERAN ? 1 : 0}"><span class="pos">${p.pos}.</span><span>
     <span class="nm">${esc(p.name)}</span>, ${p.age}${badge}
@@ -447,7 +447,7 @@ function profile(p) {
     <h2>${esc(p.name)}, ${p.age}</h2><p class="sub">${esc(p.occ)}, ${esc(p.town)}, ${affil(p)}</p>
     <div class="figs"><div><b>${p.ran + 1}×</b><span>kandidatur včetně 2026</span></div><div><b>${p.elected}×</b><span>${f(p, "zvolen", "zvolena")} 2002–2022</span></div>
       <div><b>${p.since ?? "2026"}</b><span>první doložená kandidatura</span></div><div><b>${runs(p).length}</b><span>různých kandidátek</span></div></div>
-    ${p.ran ? `<p><strong>${f(p, "Kandidoval", "Kandidovala")} za:</strong> ${lists}</p>` : `<p class="note">Jinou kandidaturu v této obci od roku 2002 jsme nenašli. Nemusí to znamenat první kandidaturu (například po změně příjmení).</p>`}
+    ${p.ran ? `<p><strong>${f(p, "Kandidoval", "Kandidovala")} za:</strong> ${lists}</p>` : `<p class="note">Jinou kandidaturu v této obci od roku 2002 jsem nenašel. Nemusí to znamenat první kandidaturu (například po změně příjmení).</p>`}
     <h3>V souvislostech</h3>
     <ul class="why">
       <li><span>Věk</span><span>${p.age} let: ${p.age_older >= 0.5 ? `mladší než ${Math.round(p.age_older * 100)} %` : `starší než ${Math.round((1 - p.age_older) * 100)} %`} kandidátů v ČR (2026)</span></li>
@@ -456,7 +456,7 @@ function profile(p) {
     ${votesChart(p)}
     <h3>Časová osa kandidatur</h3>
     <table><thead><tr><th>Rok</th><th>Kandidátka a obec</th><th>Pořadí</th><th class="opt">Hlasy</th><th class="opt">Podle hlasů</th><th>Výsledek</th></tr></thead><tbody>${rows}</tbody></table>
-    ${why ? `<h3>Jak jsme kandidatury spojili</h3><ul class="why">${why}</ul>` : ""}
+    ${why ? `<h3>Jak jsem kandidatury spojil</h3><ul class="why">${why}</ul>` : ""}
     ${p.family ? `<p class="note">V obci kandidoval i jmenovec jiného věku, spojení proto vyžadovala další shodu.</p>` : ""}
     ${p.maybe.length ? `<div class="maybe"><p><strong>Možná také ${f(p, "on", "ona")}</strong>, spojení není jisté a do počtů se nezapočítává:</p>
       ${p.maybe.map(m => `<p>${m.year}, ${esc(m.town)}, ${esc(m.list)}, ${esc(m.occ)}, ${m.age} let. Shoda: ${m.why.join(", ")}. Odhad jistoty ${Math.min(99, Math.round(m.p * 100))} %.</p>`).join("")}</div>` : ""}

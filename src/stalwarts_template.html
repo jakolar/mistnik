@@ -34,7 +34,7 @@ input { width: 100%; max-width: 480px; font: inherit; font-size: 1rem; padding: 
   <a class="back" href="index.html">← Místník</a>
   <h1>__TITLE__</h1>
   <p class="lead">__LEAD__</p>
-  <p>„Zvolen“ znamená zvolen ve volbách; nevíme, jestli dotyčný mandát vykonával celé období. Seznam je spíš dolní odhad: zahrnuje jen kandidatury, které jsme s jistotou spojili (<a href="metodika.html">jak to počítáme</a>).</p>
+  <p>„Zvolen“ znamená zvolen ve volbách; nevím, jestli dotyčný mandát vykonával celé období. Seznam je spíš dolní odhad: zahrnuje jen kandidatury, které jsem s jistotou spojil (<a href="metodika.html">jak to počítám</a>).</p>
   <label for="q" style="font:600 .95rem var(--sans);display:block;margin:24px 0 6px">Hledat obec, okres nebo jméno</label>
   <input id="q" type="search" placeholder="například Olomouc nebo Novák" autocomplete="off">
   <p class="cnt" id="cnt"></p>
@@ -49,7 +49,7 @@ const keyed = D.map(r => [norm(r[0] + " " + r[2] + " " + r[3]), r]);
 const tb = document.getElementById("rows"), cnt = document.getElementById("cnt"), q = document.getElementById("q");
 function show() {
   const v = norm(q.value.trim()), hits = keyed.filter(([k]) => !v || k.includes(v)).map(([, r]) => r);
-  cnt.textContent = `${hits.length.toLocaleString("cs-CZ")} ${v ? "nalezených" : "lidí"}` + (hits.length > 500 ? ", zobrazujeme prvních 500, upřesněte hledání" : "");
+  cnt.textContent = `${hits.length.toLocaleString("cs-CZ")} ${v ? "nalezených" : "lidí"}` + (hits.length > 500 ? ", zobrazuji prvních 500, upřesněte hledání" : "");
   tb.innerHTML = hits.slice(0, 500).map(r => `<tr><td><a href="obec/${r[4]}.html#${encodeURIComponent(r[5])}">${esc(r[0])}</a></td><td class="n opt">${r[1]}</td>
     <td><a href="obec/${r[4]}.html">${esc(r[2])}</a></td><td class="opt">${esc(r[3])}</td><td class="opt">${esc(r[6])}</td></tr>`).join("");
 }

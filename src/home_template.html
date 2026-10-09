@@ -88,7 +88,7 @@ footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px)
   <section class="block">
     <h2>Volby 2026 v číslech</h2>
     <div class="nums" id="nums"></div>
-    <p class="note">Čísla o dřívějších kandidaturách jsou spíš dolní odhad. Kandidatury spojujeme jen tam, kde jsme si jistí: zhruba u 4 % kandidátů (asi 7 500 lidí) existuje možné spojení s dřívější kandidaturou, které jsme nepotvrdili a nezobrazujeme. Nespojíme ani kandidáty, kteří změnili příjmení, typicky po sňatku. <a href="metodika.html">Jak to počítáme</a></p>
+    <p class="note">Čísla o dřívějších kandidaturách jsou spíš dolní odhad. Kandidatury spojuji jen tam, kde jsem si jistý: zhruba u 4 % kandidátů (asi 7 500 lidí) existuje možné spojení s dřívější kandidaturou, které jsem nepotvrdil a nezobrazuji. Nespojím ani kandidáty, kteří změnili příjmení, typicky po sňatku. <a href="metodika.html">Jak to počítám</a></p>
     <h3 class="sub3">Věk kandidátů 2002 až 2026</h3>
     <div id="ages" class="ages"></div>
     <h3 class="sub3">Podíl žen</h3>
@@ -119,7 +119,7 @@ footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px)
     </div>
   </section>
 </main>
-<footer>Zdroj: Český statistický úřad, kandidátní listiny 2002–2026, <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">licence CC BY 4.0</a>. Historie a statistiky jsou odvozené údaje, ne oficiální statistika ČSÚ; historie vzniká naším párováním a může obsahovat chyby, <a href="metodika.html">jak to počítáme</a>, <a href="data.html">otevřená data</a>, <a href="https://github.com/jakolar/mistnik">zdrojový kód</a>. Chyba nebo námitka: <a href="mailto:jan@klr.cz">jan@klr.cz</a>. Místník připravil Jan Antonín Kolář.</footer>
+<footer>Zdroj: Český statistický úřad, kandidátní listiny 2002–2026, <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">licence CC BY 4.0</a>. Historie a statistiky jsou odvozené údaje, ne oficiální statistika ČSÚ; historie vzniká mým párováním a může obsahovat chyby, <a href="metodika.html">jak to počítám</a>, <a href="data.html">otevřená data</a>, <a href="https://github.com/jakolar/mistnik">zdrojový kód</a>. Chyba nebo námitka: <a href="mailto:jan@klr.cz">jan@klr.cz</a>. Místník připravil Jan Antonín Kolář.</footer>
 <script>
 const idx = __INDEX__;  // [kod, nazev, okres, kandidatu, s_historii]
 const S = __STATS__;
@@ -189,7 +189,7 @@ document.getElementById("nums").innerHTML = [
   document.getElementById("women").innerHTML = `<p class="note leg"><span style="background:var(--accent)"></span>mezi kandidáty <span style="background:var(--ink)"></span>mezi zvolenými</p>
     <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Podíl žen mezi kandidáty a zvolenými 2002 až 2026">${grid}${lines}${xs}</svg>
     <div class="tip" hidden></div>
-    <p class="note">Pohlaví odhadujeme z křestního jména a tvaru příjmení; kde to nejde určit, kandidáta nepočítáme. Zvolení 2026 budou známi po sečtení.</p>`;
+    <p class="note">Pohlaví odhaduji z křestního jména a tvaru příjmení; kde to nejde určit, kandidáta nepočítám. Zvolení 2026 budou známi po sečtení.</p>`;
   // hover: nearest election, crosshair + both values (same pattern as the age curve)
   const box = document.getElementById("women"), svg = box.querySelector("svg"), tip = box.querySelector(".tip");
   svg.insertAdjacentHTML("beforeend", `<line class="cur" y1="${pt}" y2="${H - pb}" stroke="var(--ink)" stroke-opacity=".35" style="display:none"/>`);
@@ -225,7 +225,7 @@ document.getElementById("occ").innerHTML = `
 document.getElementById("eage").innerHTML = S.elected_age.map(([b, e, n]) => {
   const r = e / n, pc = v => Math.round(v * 100) + " %";
   return `<div class="erow"><span>${b} let</span><span class="ebar" title="${num(e)} zvolených z ${num(n)} kandidatur"><i style="width:${r * 100 / .5}%"></i><b style="left:${O.base * 100 / .5}%"></b></span><span><strong>${pc(r)}</strong> <small>${num(e)} z ${num(n)}</small></span></div>`;
-}).join("") + `<p class="note">Svislá čárka je průměr všech kandidatur (${Math.round(O.base * 100)} %). Počítáme kandidatury, jeden člověk se může objevit vícekrát.</p>`;
+}).join("") + `<p class="note">Svislá čárka je průměr všech kandidatur (${Math.round(O.base * 100)} %). Počítám kandidatury, jeden člověk se může objevit vícekrát.</p>`;
 const keyed = idx.map(r => [norm(r[1] + " " + r[2]), r]);
 const q = document.getElementById("q"), res = document.getElementById("res"), cnt = document.getElementById("count");
 function show() {

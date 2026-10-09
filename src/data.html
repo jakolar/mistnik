@@ -28,20 +28,20 @@ p, li { max-width: 66ch; }
 <main>
   <a class="back" href="index.html">← Místník</a>
   <h1>Otevřená data</h1>
-  <p class="lead">Spojování kandidatur do osob je náš odhad. Aby si ho mohl kdokoli zkontrolovat, zveřejňujeme všechna spojení i ta, kterým zatím nevěříme. Soubory neobsahují jména ani věk: kandidatury jsou označené klíčem z dat ČSÚ, ze kterých si údaje doplníte.</p>
+  <p class="lead">Spojování kandidatur do osob je můj odhad. Aby si ho mohl kdokoli zkontrolovat, zveřejňuji všechna spojení i ta, kterým zatím nevěřím. Soubory neobsahují jména ani věk: kandidatury jsou označené klíčem z dat ČSÚ, ze kterých si údaje doplníte.</p>
 
   <h2>Soubory</h2>
   <div class="wrap"><table>
     <tr><th>soubor</th><th>obsah</th><th>velikost</th></tr>
-    <tr><td><a href="data/osoby.csv.gz">osoby.csv.gz</a></td><td>každá kandidatura 2002–2026 a číslo osoby, ke které ji přiřazujeme (__N_OSOBY__ osob)</td><td>__osoby.csv.gz__</td></tr>
+    <tr><td><a href="data/osoby.csv.gz">osoby.csv.gz</a></td><td>každá kandidatura 2002–2026 a číslo osoby, ke které ji přiřazuji (__N_OSOBY__ osob)</td><td>__osoby.csv.gz__</td></tr>
     <tr><td><a href="data/spojeni.csv.gz">spojeni.csv.gz</a></td><td>zveřejněná spojení dvou kandidatur s jistotou a důvody (__N_SPOJENI__)</td><td>__spojeni.csv.gz__</td></tr>
-    <tr><td><a href="data/nejista_spojeni.csv.gz">nejista_spojeni.csv.gz</a></td><td><strong>nepotvrzená</strong> spojení, která na webu nezobrazujeme (__N_NEJISTA__). Nejsou to tvrzení o tom, že jde o stejného člověka.</td><td>__nejista_spojeni.csv.gz__</td></tr>
+    <tr><td><a href="data/nejista_spojeni.csv.gz">nejista_spojeni.csv.gz</a></td><td><strong>nepotvrzená</strong> spojení, která na webu nezobrazuji (__N_NEJISTA__). Nejsou to tvrzení o tom, že jde o stejného člověka.</td><td>__nejista_spojeni.csv.gz__</td></tr>
     <tr><td><a href="data/povolani_zvolitelnost.csv">povolani_zvolitelnost.csv</a></td><td>podíl zvolených podle zápisu povolání 2002–2022 (zápisy s aspoň 1 000 kandidaturami, bez veřejných funkcí)</td><td>__povolani_zvolitelnost.csv__</td></tr>
   </table></div>
   <p>Kódování UTF-8, oddělovač čárka. Čísla osob se mohou mezi verzemi dat měnit; stálý je klíč kandidatury.</p>
 
   <h2>Klíč kandidatury</h2>
-  <p><code>rok:KODZASTUP:COBVODU:POR_STR_HL:PORCISLO</code>, například <code>2022:554782:1:4:12</code>. Sloupce odpovídají souboru kandidátů (<code>kvrk</code>) v otevřených datech komunálních voleb na <a href="https://www.volby.gov.cz/opendata/opendata.htm">volby.gov.cz</a>: kód zastupitelstva, volební obvod, číslo kandidátky a pořadí na ní. Používáme jen řádné volby.</p>
+  <p><code>rok:KODZASTUP:COBVODU:POR_STR_HL:PORCISLO</code>, například <code>2022:554782:1:4:12</code>. Sloupce odpovídají souboru kandidátů (<code>kvrk</code>) v otevřených datech komunálních voleb na <a href="https://www.volby.gov.cz/opendata/opendata.htm">volby.gov.cz</a>: kód zastupitelstva, volební obvod, číslo kandidátky a pořadí na ní. Používám jen řádné volby.</p>
 
   <h2>Sloupce spojení</h2>
   <div class="wrap"><table>
@@ -58,12 +58,12 @@ p, li { max-width: 66ch; }
     <tr><td><code>second</code></td><td>druhá nezávislá shoda: <code>rules</code> podle pravidel, <code>jev_field</code> podle jazykového modelu</td></tr>
     <tr><td><code>jev_pair</code>, <code>jev3</code></td><td>odpověď jazykového modelu Jev na otázku, zda jde o stejného člověka (0–1); <code>jev3</code> je novější verze dotazu s bohatším kontextem</td></tr>
   </table></div>
-  <p>Jak se z toho skládá rozhodnutí, popisujeme v <a href="metodika.html">metodice</a>. Spojení zakázaná kvůli nesouhlasu věku nebo dvěma kandidaturám v jedněch volbách nezveřejňujeme.</p>
+  <p>Jak se z toho skládá rozhodnutí, popisuji v <a href="metodika.html">metodice</a>. Spojení zakázaná kvůli nesouhlasu věku nebo dvěma kandidaturám v jedněch volbách nezveřejňuji.</p>
 
   <p>Kód, který spojení počítá, je volně na <a href="https://github.com/jakolar/mistnik">GitHubu</a>.</p>
 
   <h2>Licence a chyby</h2>
-  <p>Naši práci dáváme volně: data můžete kopírovat, upravovat a používat k čemukoli a Místník uvádět nemusíte. Vycházejí ale z otevřených dat Českého statistického úřadu pod licencí <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">CC BY 4.0</a>, takže při jejich šíření uveďte zdroj ČSÚ, odkaz na <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">podmínky licence</a> a že jde o odvozené údaje, ne o oficiální statistiku ČSÚ. Data se týkají skutečných lidí: nepoužívejte je k obtěžování kandidátů a nepotvrzená spojení nevydávejte za fakta. Chybné spojení nám prosím pošlete na <a href="mailto:__CONTACT__">__CONTACT__</a> s oběma klíči kandidatur.</p>
+  <p>Svou práci dávám volně: data můžete kopírovat, upravovat a používat k čemukoli a Místník uvádět nemusíte. Vycházejí ale z otevřených dat Českého statistického úřadu pod licencí <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">CC BY 4.0</a>, takže při jejich šíření uveďte zdroj ČSÚ, odkaz na <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">podmínky licence</a> a že jde o odvozené údaje, ne o oficiální statistiku ČSÚ. Data se týkají skutečných lidí: nepoužívejte je k obtěžování kandidátů a nepotvrzená spojení nevydávejte za fakta. Chybné spojení mi prosím pošlete na <a href="mailto:__CONTACT__">__CONTACT__</a> s oběma klíči kandidatur.</p>
 </main>
 </body>
 </html>
