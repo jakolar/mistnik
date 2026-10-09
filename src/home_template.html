@@ -166,7 +166,22 @@ document.getElementById("nums").innerHTML = [
   const xs = D.map((d, i) => `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${d[0]}</text>`).join("");
   document.getElementById("women").innerHTML = `<p class="note leg"><span style="background:var(--accent)"></span>mezi kandidáty <span style="background:var(--ink)"></span>mezi zvolenými</p>
     <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Podíl žen mezi kandidáty a zvolenými 2002 až 2026">${grid}${lines}${xs}</svg>
+    <div class="tip" hidden></div>
     <p class="note">Pohlaví odhadujeme z křestního jména a tvaru příjmení; kde to nejde určit, kandidáta nepočítáme. Zvolení 2026 budou známi po sečtení.</p>`;
+  // hover: nearest election, crosshair + both values (same pattern as the age curve)
+  const box = document.getElementById("women"), svg = box.querySelector("svg"), tip = box.querySelector(".tip");
+  svg.insertAdjacentHTML("beforeend", `<line class="cur" y1="${pt}" y2="${H - pb}" stroke="var(--ink)" stroke-opacity=".35" style="display:none"/>`);
+  const cur = svg.querySelector(".cur");
+  svg.addEventListener("pointermove", e => {
+    const r = svg.getBoundingClientRect(), vx = (e.clientX - r.left) / r.width * W;
+    const i = Math.max(0, Math.min(D.length - 1, Math.round((vx - pl) / ((W - pl - pr) / (D.length - 1)))));
+    cur.setAttribute("x1", x(i)); cur.setAttribute("x2", x(i)); cur.style.display = "";
+    tip.hidden = false;
+    tip.textContent = `${D[i][0]}: kandidáti ${p(D[i][1])}` + (D[i][2] == null ? ", zvolení po sečtení" : `, zvolení ${p(D[i][2])}`);
+    tip.style.top = (svg.offsetTop - 4) + "px";
+    tip.style.left = Math.min(r.width - 250, Math.max(0, x(i) / W * r.width - 100)) + "px";
+  });
+  svg.addEventListener("pointerleave", () => { tip.hidden = true; cur.style.display = "none"; });
 })();
 const row = r => `<li><a href="obec/${r[4]}.html">${esc(r[2])}, ${esc(r[3])}</a><span>průměr ${String(r[0]).replace(".", ",")} let</span></li>`;
 document.getElementById("facts").innerHTML = `
