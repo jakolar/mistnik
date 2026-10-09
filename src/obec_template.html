@@ -198,7 +198,7 @@ function move22(p) {
 }
 function moveLine(p) {
   const m = move22(p), a = p.female ? "a" : "";
-  return m.kind === "new" ? `<span class="mv stay">nový</span>`
+  return m.kind === "new" ? ""
     : m.kind === "break" ? `<span class="mv stay">v roce 2022 nekandidoval${a}</span>`
     : m.kind === "elsewhere" ? `<span class="mv stay">v roce 2022 kandidoval${a} jinde (${esc(m.town)})</span>`
     : m.kind === "stay" ? `<span class="mv stay">zůstal${a} u kandidátky ${esc(m.list)}</span>`
@@ -273,19 +273,21 @@ function moveTables() {
   const inc = (o, k, n = 1) => (o[k] = (o[k] || 0) + n, o);
   const to = new Map(), from = new Map();
   for (const p of people) {
-    const m = move22(p), t = to.get(p.list) || {stay: 0, moved: 0, src: {}, elsewhere: 0, break: 0, new: 0, n: 0};
-    t.n++; m.kind === "moved" ? (t.moved++, inc(t.src, m.list)) : t[m.kind]++;
+    const m = move22(p);
+    if (m.kind === "new") continue;  // newcomers are not moves
+    const t = to.get(p.list) || {stay: 0, moved: 0, src: {}, elsewhere: 0, break: 0};
+    m.kind === "moved" ? (t.moved++, inc(t.src, m.list)) : t[m.kind]++;
     to.set(p.list, t);
     if (m.list) { const f = from.get(m.list) || {stay: 0, moved: 0, dst: {}, out: 0}; m.kind === "stay" ? f.stay++ : (f.moved++, inc(f.dst, p.list)); from.set(m.list, f); }
   }
   for (const l of meta.leaving || []) { const f = from.get(l.list) || {stay: 0, moved: 0, dst: {}, out: 0}; f.out++; from.set(l.list, f); }
   const det = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${esc(k)} ${n}`).join(", ");
   const c = (n, d) => `<td class="n">${n || "–"}${n && d ? `<div class="src">${d}</div>` : ""}</td>`;
-  const a = [...to].map(([k, t]) => `<tr><th>${esc(k)}</th>${c(t.stay)}${c(t.moved, det(t.src))}${c(t.elsewhere)}${c(t.break)}${c(t.new)}<td class="n"><b>${t.n}</b></td></tr>`).join("");
+  const a = [...to].map(([k, t]) => `<tr><th>${esc(k)}</th>${c(t.stay)}${c(t.moved, det(t.src))}${c(t.elsewhere)}${c(t.break)}</tr>`).join("");
   const b = [...from].sort((x, y) => (y[1].stay + y[1].moved) - (x[1].stay + x[1].moved))
     .map(([k, f]) => `<tr><th>${esc(k)}</th>${c(f.stay)}${c(f.moved, det(f.dst))}${c(f.out)}</tr>`).join("");
   return `<h3>Odkud přišli kandidáti 2026</h3>
-    <div class="ftw"><table class="ft"><thead><tr><th>kandidátka 2026</th><th>zůstali</th><th>přešli z jiné</th><th>2022 jinde</th><th>dříve, ne 2022</th><th>noví</th><th>celkem</th></tr></thead><tbody>${a}</tbody></table></div>
+    <div class="ftw"><table class="ft"><thead><tr><th>kandidátka 2026</th><th>zůstali</th><th>přešli z jiné</th><th>2022 jinde</th><th>dříve, ne 2022</th></tr></thead><tbody>${a}</tbody></table></div>
     <h3>Kam šli kandidáti z roku 2022</h3>
     <div class="ftw"><table class="ft"><thead><tr><th>kandidátka 2022</th><th>zůstali</th><th>přešli jinam</th><th>zvolení, už nekandidují</th></tr></thead><tbody>${b}</tbody></table></div>
     <p class="stats">Počítáme jen lidi, kteří kandidují v roce 2026, a zvolené z roku 2022. O nezvolených kandidátech 2022, kteří už nekandidují, údaj neuvádíme.</p>`;
@@ -294,7 +296,7 @@ function flowSvg() {
   const links = new Map(), L = new Map(), R = new Map();
   const add = (m, k, n) => m.set(k, (m.get(k) || 0) + n);
   const GROUP = {new: "noví", break: "kandidovali dříve, ne 2022", elsewhere: "v roce 2022 jinde"}, OUT = "zvolení 2022, už nekandidují";
-  const flows = people.map(p => { const m = move22(p); return [m.list || GROUP[m.kind], p.list, m.kind === "moved"]; })
+  const flows = people.map(p => [move22(p), p.list]).filter(([m]) => m.kind !== "new").map(([m, l]) => [m.list || GROUP[m.kind], l, m.kind === "moved"])
     .concat((meta.leaving || []).map(l => [l.list, OUT, false]));
   // ponytail: big cities have 20+ lists a side; fold the smallest into "ostatní" so labels stay readable
   const MAXN = 12, OTHER = "ostatní kandidátky", fold = side => {
@@ -326,7 +328,7 @@ function flowSvg() {
   const lab = (o, x, anchor) => [...o].map(([k, v]) => `<rect x="${anchor === "end" ? x - 4 : x}" y="${v.y}" width="4" height="${Math.max(v.h, 1)}" fill="var(--ink)"/>
     <text x="${anchor === "end" ? x - 8 : x + 8}" y="${v.y + v.h / 2 + 4}" text-anchor="${anchor}"><title>${esc(k)}: ${num(v.h / scale)}</title>${esc(k.length > 32 ? k.slice(0, 31) + "…" : k)} <tspan style="fill:var(--muted)">${Math.round(v.h / scale)}</tspan></text>`).join("");
 
-  return `<h3>Odkud kandidáti přišli</h3><p class="stats">Vlevo kde kandidáti byli v roce 2022 v této obci, vpravo kandidátky 2026. Tmavé pásy jsou přesuny mezi kandidátkami, světlé setrvání nebo příchod nových. Číslo je počet lidí.</p>
+  return `<h3>Odkud kandidáti přišli</h3><p class="stats">Jen kandidáti, kteří už dříve kandidovali. Vlevo kde byli v roce 2022 v této obci, vpravo kandidátky 2026. Tmavé pásy jsou přesuny mezi kandidátkami, světlé setrvání. Číslo je počet lidí.</p>
     <svg viewBox="0 0 ${W} ${HH}" role="img" aria-label="Přesuny kandidátů mezi kandidátkami 2022 a 2026" style="width:100%;max-width:${W}px;height:auto">${bands}${lab(lp, x0, "end")}${lab(rp, x1, "start")}</svg>
     ${tables}`;
 }
