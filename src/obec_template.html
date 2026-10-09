@@ -46,6 +46,8 @@ a.no { color: inherit; text-decoration: none; } a.no:hover { text-decoration: un
 .hl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0 0; font-size: .875rem; }
 .hl button { font: inherit; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 6px 12px; min-height: 36px; cursor: pointer; }
 .hl button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+#movesBtn { margin-left: 14px; border-style: dashed; }  /* a separate view, not one of the highlight filters */
+#movesBtn[aria-pressed="true"] { border-style: solid; }
 #hlcount { color: var(--muted); }
 .row.dim { opacity: .3; }
 #flow { margin: 16px 0 0; border-top: 1px solid var(--rule); padding-top: 12px; }
@@ -125,8 +127,7 @@ footer { max-width: none; margin: 0 auto; padding: 16px; color: var(--muted); fo
   td.opt, th.opt { display: none; }
   .top small { display: none; }
   .top nav { gap: 12px !important; }
-  .flowsvg { overflow-x: auto; }
-  .flowsvg svg { min-width: 720px; }
+  .flowsvg { display: none; }  /* the per-list sentences below carry the same numbers on a phone */
 }
 </style>
 </head>
@@ -191,7 +192,7 @@ function histLine(p) {
   const base = `${f(p, "Kandidoval", "Kandidovala")} dříve ${p.ran}×` + (p.elected ? `, ${f(p, "zvolen", "zvolena")} ${p.elected}×` : "") + gap;
   if (same) return `${dots(p)}${base}, vždy za stejnou kandidátku`;
   const prev = r.at(-2);
-  return `${dots(p)}${base}, dříve za ${esc(prev.list)}`;
+  return `${dots(p)}${base}, předtím (${prev.from === prev.to ? prev.from : prev.from + "–" + prev.to}) za ${esc(prev.list)}`;
 }
 
 function prev22(p) { return p.history.find(h => h.year === "2022"); }
@@ -419,7 +420,7 @@ function votesChart(p) {
   const moves = [...d].reverse().filter(h => h.vrank != null).map(h => {
     const delta = h.pos - h.vrank;
     const mv = delta > 0 ? `voliči ${f(p, "ho", "ji")} posunuli o ${delta} ${delta === 1 ? "místo" : delta < 5 ? "místa" : "míst"} nahoru` : delta < 0 ? `voliči ${f(p, "ho", "ji")} posunuli o ${-delta} ${-delta === 1 ? "místo" : -delta < 5 ? "místa" : "míst"} dolů` : "voliči pořadí potvrdili";
-    return `<li><span>${h.year}</span><span>na kandidátce ${h.pos}., podle hlasů ${h.vrank}. z ${h.vn}: ${mv}${h.vshare == null ? "" : `; ${Math.round(h.vshare * 1000) / 10} % hlasů kandidátky`}${h.skip ? `, ${f(p, "zvolen", "zvolena")} díky preferenčním hlasům` : ""}</span></li>`; }).join("");
+    return `<li><span>${h.year}</span><span>na kandidátce ${h.pos}., podle hlasů ${h.vrank}. z ${h.vn}: ${mv}${h.vshare == null ? "" : `; ${(Math.round(h.vshare * 1000) / 10).toLocaleString("cs-CZ")} % hlasů kandidátky`}${h.skip ? `, ${f(p, "zvolen", "zvolena")} díky preferenčním hlasům` : ""}</span></li>`; }).join("");
   return `<h3>Hlasy ve volbách</h3><svg viewBox="0 0 ${W} ${H + 18}" role="img" aria-label="Počet hlasů v jednotlivých volbách" style="width:100%;height:auto;overflow:visible;font:12px var(--sans);fill:var(--muted)">${bars}</svg>
     <p class="note">Tmavý sloupec: zvolen. Hlasy nejsou srovnatelné mezi obcemi různé velikosti, důležitější je pořadí na kandidátce.</p>
     <ul class="why">${moves}</ul>`;
@@ -432,7 +433,7 @@ function profile(p) {
     <td class="n opt">${h.vrank == null ? "–" : `${h.vrank}. z ${h.vn}`}</td>
     <td>${h.year === "2026" ? "kandiduje" : h.elected ? (h.skip ? f(p, "zvolen díky preferenčním hlasům", "zvolena díky preferenčním hlasům") : f(p, "zvolen", "zvolena")) : "ne"}</td></tr>`).join("");
   const conf = x => x == null ? "" : x >= 0.9999 ? "velmi vysoká jistota" : x >= 0.999 ? "vysoká jistota" : "jistota nižší";
-  const pc = x => x == null ? "" : ` (${conf(x)}, odhad ${(Math.min(x, 0.9999) * 100).toLocaleString("cs-CZ", {maximumFractionDigits: 2})} %)`;
+  const pc = x => x == null ? "" : ` (${conf(x)})`;  // a capped "99,99 %" invites false precision in quotes
   const why = [...p.history].reverse().filter(h => h.why.length).map(h => `<li><span>${h.year}</span><span>${h.why.join(", ")}${pc(h.p)}</span></li>`).join("");
   return `<button class="close" type="button" autofocus>Zavřít</button>
     <h2>${esc(p.name)}, ${p.age}</h2><p class="sub">${esc(p.occ)}, ${esc(p.town)}, ${affil(p)}</p>

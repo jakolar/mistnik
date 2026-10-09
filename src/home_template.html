@@ -69,7 +69,7 @@ footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px)
 
   <div class="search">
     <label for="q">Najděte obec, městskou část nebo kandidáta</label>
-    <input id="q" type="search" placeholder="například Hnojice, Praha 7 nebo příjmení kandidáta" autocomplete="off" autofocus>
+    <input id="q" type="search" placeholder="např. Hnojice nebo příjmení" autocomplete="off" autofocus>
     <div class="chips" id="big"></div>
     <p class="note" id="count"></p>
   </div>
@@ -124,9 +124,9 @@ document.getElementById("big").innerHTML = S.big.map(([k, n]) => `<a href="obec/
 document.getElementById("nums").innerHTML = [
   [num(S.councils), "obcí a městských částí"], [num(S.lists), "kandidátek"], [num(S.cands), "kandidátů"],
   [pct(S.women, S.women + S.men), "žen mezi kandidáty"], [pct(S.again, S.cands), "kandidovalo už dříve"],
-  [pct(S.inc, S.e22), "zvolených v roce 2022 kandiduje znovu"], [num(S.long), "kandiduje od roku 2010 nebo dřív"],
+  [pct(S.inc, S.e22), "zvolených v roce 2022 kandiduje znovu"], [num(S.long), "poprvé kandidovalo v roce 2010 nebo dřív"],
   [num(S.seventh), `<a href="kandiduji-posedme.html">kandiduje posedmé, ve všech volbách od roku 2002</a>`],
-  [num(S.stalwarts), `<a href="zvoleni-od-2002.html">zvoleno ve všech volbách od roku 2002</a>`],
+  [num(S.stalwarts), `<a href="zvoleni-od-2002.html">zvoleno ve všech volbách od roku 2002 a kandiduje znovu</a>`],
 ].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
 // age distribution per election as share of that year's candidates: 2026 highlighted, earlier years in grey
 (() => {

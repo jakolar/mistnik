@@ -103,9 +103,24 @@ def run(allc):
         print(f"  p>={t}: {(E.jev3 >= t).sum()}")
 
 
+def cached(allc):
+    """Answers already in the cache (partial run), no API calls -> data/derived/jev_pair3.csv"""
+    E = pd.read_csv(DER / "cluster_edges.csv.gz", usecols=["id_a", "id_b", "decision"])
+    E = E[E.decision.str.startswith("manual_review")]
+    nat, nat_m, loc = stats(allc)
+    def look(a, b):
+        r = J.con.execute("SELECT p FROM jev WHERE kind=? AND a=? AND b=?", (QKIND, a, b)).fetchone()
+        return r[0] if r else None
+    E["jev3"] = [look(*context(allc.loc[a], allc.loc[b], nat, nat_m, loc)) for a, b in zip(E.id_a, E.id_b)]
+    E.to_csv(DER / "jev_pair3.csv", index=False)
+    print("answered", E.jev3.notna().sum(), "of", len(E), {t: int((E.jev3 >= t).sum()) for t in (0.8, 0.9)})
+
+
 if __name__ == "__main__":
     allc = load_all()
-    if sys.argv[1] == "eval":
+    if sys.argv[1] == "cached":
+        cached(allc)
+    elif sys.argv[1] == "eval":
         ev(allc, int(sys.argv[2]) if len(sys.argv) > 2 else 150)
     else:
         run(allc)
