@@ -22,6 +22,24 @@ def js(obj):
     return json.dumps(obj, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
 
+def obec_static(people):
+    """Plain HTML of the same lists the script renders, so crawlers without JavaScript (Seznam) see the content.
+    The script replaces both blocks on load, so readers never see this version."""
+    e = lambda s: html.escape(str(s))
+    groups = {}
+    for p in people:
+        groups.setdefault(p["list_no"], []).append(p)
+    lists = [ps for ps in groups.values() if len(ps) > 1]
+    solo = [ps[0] for ps in groups.values() if len(ps) == 1]
+    summary = f"<p>{len(lists) + len(solo)} kandidátek, {len(people)} kandidátů.</p>"
+    body = "".join(f"<section><h2>{e(ps[0]['list'])}</h2><ol>" + "".join(
+        f"<li>{e(p['name'])}, {p['age']} let, {e(p['occ'])}" + (f", kandidoval{'a' if p['female'] else ''} dříve {p['ran']}×" if p["ran"] else "") + "</li>"
+        for p in sorted(ps, key=lambda p: p["pos"])) + "</ol></section>" for ps in lists)
+    if solo:
+        body += "<section><h2>Jednotliví kandidáti</h2><ul>" + "".join(f"<li>{e(p['name'])}, {p['age']} let, {e(p['list'])}</li>" for p in solo) + "</ul></section>"
+    return summary, body
+
+
 def obec_desc(town, people):
     """Search-result snippet for a municipality page, from the same data the page shows."""
     lists = list(dict.fromkeys(p["list"] for p in people))
@@ -144,7 +162,9 @@ def main():
         meta = {"elected22": len(e22), "running": sum(p["incumbent"] for p in people), "leaving": leaving, "contact": CONTACT,
                 "ages": age_stats.get(kod, {})}
         town = council_name.get(kod, kod)
-        page = (tpl.replace("__DESC__", html.escape(obec_desc(town, people), quote=True)).replace("__KOD__", kod)
+        st_sum, st_lists = obec_static(people)
+        page = (tpl.replace("__STATIC_SUMMARY__", st_sum).replace("__STATIC_LISTS__", st_lists)
+                .replace("__DESC__", html.escape(obec_desc(town, people), quote=True)).replace("__KOD__", kod)
                 .replace("__TOWN__", html.escape(town)).replace("__DATA__", js(people)).replace("__META__", js(meta))
                 .replace("__CONTACT__", CONTACT))
         (SITE / "obec" / f"{kod}.html").write_text(page)

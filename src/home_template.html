@@ -37,7 +37,10 @@ input { width: 100%; font: inherit; font-size: 1.2rem; padding: 16px; border: 2p
 .chips a { text-decoration: none; color: var(--ink); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 12px; font-size: .9rem; }
 .chips a:hover { background: var(--hover); }
 ul.res { list-style: none; padding: 0; margin: 12px 0 0; max-width: 720px; }
-.res li a { display: flex; justify-content: space-between; gap: 12px; padding: 10px 4px; border-bottom: 1px solid var(--grid); color: var(--ink); text-decoration: none; }
+.res li a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 4px; min-height: 44px; border-bottom: 1px solid var(--grid); color: var(--ink); text-decoration: none; }
+.res li:first-child a { background: var(--hover); }  /* Enter opens this one */
+.searching #big { display: none; }  /* while typing, suggestions sit right under the field */
+@media (max-width: 600px) { .res li span { font-size: .8rem; text-align: right; white-space: normal; } }
 .res li a:hover { background: var(--hover); }
 .res li span { color: var(--muted); font-size: .9rem; white-space: nowrap; }
 .note { color: var(--muted); font-size: .9rem; margin-top: 8px; }
@@ -85,11 +88,11 @@ footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px)
 
   <div class="search">
     <label for="q">Najděte obec, městskou část nebo kandidáta</label>
-    <input id="q" type="search" placeholder="např. Hnojice nebo příjmení" autocomplete="off" autofocus>
-    <div class="chips" id="big"></div>
+    <input id="q" type="search" placeholder="např. Hnojice nebo příjmení" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" autofocus>
     <p class="note" id="count"></p>
+    <ul class="res" id="res"></ul>
+    <div class="chips" id="big"></div>
   </div>
-  <ul class="res" id="res"></ul>
   <h2 id="ph" hidden style="font:600 1rem var(--sans);margin:24px 0 0">Kandidáti 2026</h2>
   <ul class="res" id="people"></ul>
 
@@ -238,8 +241,11 @@ const keyed = idx.map(r => [norm(r[1] + " " + r[2]), r]);
 const q = document.getElementById("q"), res = document.getElementById("res"), cnt = document.getElementById("count");
 function show() {
   const v = norm(q.value.trim());
+  document.body.classList.toggle("searching", v.length >= 1);
+  // name starts with the query first, then bigger councils (more candidates) first
+  const tier = r => { const n = norm(r[1]); return n.startsWith(v) ? 0 : n.includes(v) ? 1 : 2; };  // 2 = only the district matches
   const hits = v.length < 2 ? [] : keyed.filter(([k]) => k.includes(v)).map(([, r]) => r)
-    .sort((a, b) => (norm(a[1]).startsWith(v) ? 0 : 1) - (norm(b[1]).startsWith(v) ? 0 : 1)).slice(0, 40);
+    .sort((a, b) => tier(a) - tier(b) || b[3] - a[3]).slice(0, 40);
   cnt.textContent = v.length < 2 ? "" : hits.length ? "" : "Obec nenalezena. Zkuste jiný tvar názvu.";
   res.innerHTML = hits.map(r => `<li><a href="obec/${r[0]}.html"><strong>${esc(r[1])}</strong><span>${esc(r[2])}, ${num(r[3])} kandidátů</span></a></li>`).join("");
 }
@@ -264,7 +270,10 @@ async function showPeople() {
   ppl.innerHTML = hits.map(r => `<li><a href="obec/${r[3]}.html#${encodeURIComponent(r[4])}"><strong>${esc(r[0])}, ${r[1]}</strong>
     <span>${esc(r[2])}${r[5] ? `, dříve kandidoval/a ${r[5]}×` : ""}</span></a></li>`).join("");
 }
-q.addEventListener("input", () => { show(); showPeople(); });
+let pplTimer;
+q.addEventListener("input", () => { show(); clearTimeout(pplTimer); pplTimer = setTimeout(showPeople, 200); });  // people shards: wait for a pause in typing
+q.addEventListener("keydown", e => { if (e.key === "Enter") { const a = document.querySelector("#res a, #people a"); if (a) { e.preventDefault(); location.href = a.href; } } });
+q.addEventListener("focus", () => { if (innerWidth < 600) setTimeout(() => q.scrollIntoView({block: "start", behavior: "smooth"}), 250); });  // keep suggestions above the phone keyboard
 document.querySelectorAll(".showmore").forEach(b => b.addEventListener("click", () => {
   b.previousElementSibling.querySelectorAll("li[hidden]").forEach(li => li.hidden = false); b.remove(); }));
 </script>
