@@ -180,7 +180,7 @@ def main():
     import export_open_data
     export_open_data.main(CONTACT)
     # search engines: robots.txt + sitemap of every page (indexing approved by Jan 2026-10-09)
-    base = "https://mistnik-cz.web.app"  # ponytail: switch to the custom domain when it exists
+    base = "https://mistnik.cz"
     urls = [f"{base}/", f"{base}/povolani", f"{base}/metodika", f"{base}/data"] + [f"{base}/obec/{r[0]}" for r in index]
     (SITE / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n")
