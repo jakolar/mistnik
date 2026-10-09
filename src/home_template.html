@@ -35,7 +35,8 @@ ul.res { list-style: none; padding: 0; margin: 12px 0 0; max-width: 720px; }
 .note { color: var(--muted); font-size: .9rem; margin-top: 8px; }
 h2 { font: 600 1.35rem var(--serif); margin: 0 0 12px; }
 section.block { margin-top: 64px; padding-top: 20px; border-top: 2px solid var(--ink); }
-.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 24px; }
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 24px 16px; }
+@media (max-width: 400px) { .nums { grid-template-columns: 1fr 1fr; } }
 .nums b { display: block; font: 600 clamp(1.8rem, 4vw, 2.4rem)/1.05 var(--serif); font-variant-numeric: tabular-nums; }
 .nums span { color: var(--muted); font-size: .9rem; }
 .three { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; }

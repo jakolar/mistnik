@@ -118,6 +118,21 @@ footer { max-width: none; margin: 0 auto; padding: 16px; color: var(--muted); fo
   .list, .nk { display: none; }
   .list.on, .nk.on { display: block; }
   td.opt, th.opt { display: none; }
+  .top small { display: none; }
+  .top nav { gap: 12px !important; }
+  .flowsvg { overflow-x: auto; }
+  .flowsvg svg { min-width: 720px; }
+  /* move tables as cards: list name on its own line, counts labelled below */
+  .ft thead { display: none; }
+  .ft, .ft tbody, .ft tr { display: block; }
+  .ft tr { padding: 8px 0; border-bottom: 1px solid var(--rule); }
+  .ft th, .ft td { border: 0; padding: 0; }
+  .ft tbody th { display: block; min-width: 0; margin-bottom: 4px; }
+  .ft td.n { display: inline-block; min-width: 0; margin-right: 14px; vertical-align: top; text-align: left; }
+  .flowsvg::after { content: "Diagram posuňte do strany."; display: block; color: var(--muted); font-size: .8rem; position: sticky; left: 0; }
+  .ft td.n::before { content: attr(data-l) " "; color: var(--muted); font-size: .8rem; }
+  .ft td.n:has(.src) { display: block; }
+  .ft .src { min-width: 0; }
 }
 </style>
 </head>
@@ -282,10 +297,10 @@ function moveTables() {
   }
   for (const l of meta.leaving || []) { const f = from.get(l.list) || {stay: 0, moved: 0, dst: {}, out: 0}; f.out++; from.set(l.list, f); }
   const det = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${esc(k)} ${n}`).join(", ");
-  const c = (n, d) => `<td class="n">${n || "–"}${n && d ? `<div class="src">${d}</div>` : ""}</td>`;
-  const a = [...to].map(([k, t]) => `<tr><th>${esc(k)}</th>${c(t.stay)}${c(t.moved, det(t.src))}${c(t.elsewhere)}${c(t.break)}</tr>`).join("");
+  const c = (n, d, l) => `<td class="n" data-l="${l}">${n || "–"}${n && d ? `<div class="src">${d}</div>` : ""}</td>`;
+  const a = [...to].map(([k, t]) => `<tr><th>${esc(k)}</th>${c(t.stay, "", "zůstali")}${c(t.moved, det(t.src), "přešli z jiné")}${c(t.elsewhere, "", "2022 jinde")}${c(t.break, "", "dříve, ne 2022")}</tr>`).join("");
   const b = [...from].sort((x, y) => (y[1].stay + y[1].moved) - (x[1].stay + x[1].moved))
-    .map(([k, f]) => `<tr><th>${esc(k)}</th>${c(f.stay)}${c(f.moved, det(f.dst))}${c(f.out)}</tr>`).join("");
+    .map(([k, f]) => `<tr><th>${esc(k)}</th>${c(f.stay, "", "zůstali")}${c(f.moved, det(f.dst), "přešli jinam")}${c(f.out, "", "zvolení, už nekandidují")}</tr>`).join("");
   return `<h3>Odkud přišli kandidáti 2026</h3>
     <div class="ftw"><table class="ft"><thead><tr><th>kandidátka 2026</th><th>zůstali</th><th>přešli z jiné</th><th>2022 jinde</th><th>dříve, ne 2022</th></tr></thead><tbody>${a}</tbody></table></div>
     <h3>Kam šli kandidáti z roku 2022</h3>
@@ -329,7 +344,7 @@ function flowSvg() {
     <text x="${anchor === "end" ? x - 8 : x + 8}" y="${v.y + v.h / 2 + 4}" text-anchor="${anchor}"><title>${esc(k)}: ${num(v.h / scale)}</title>${esc(k.length > 32 ? k.slice(0, 31) + "…" : k)} <tspan style="fill:var(--muted)">${Math.round(v.h / scale)}</tspan></text>`).join("");
 
   return `<h3>Odkud kandidáti přišli</h3><p class="stats">Jen kandidáti, kteří už dříve kandidovali. Vlevo kde byli v roce 2022 v této obci, vpravo kandidátky 2026. Tmavé pásy jsou přesuny mezi kandidátkami, světlé setrvání. Číslo je počet lidí.</p>
-    <svg viewBox="0 0 ${W} ${HH}" role="img" aria-label="Přesuny kandidátů mezi kandidátkami 2022 a 2026" style="width:100%;max-width:${W}px;height:auto">${bands}${lab(lp, x0, "end")}${lab(rp, x1, "start")}</svg>
+    <div class="flowsvg"><svg viewBox="0 0 ${W} ${HH}" role="img" aria-label="Přesuny kandidátů mezi kandidátkami 2022 a 2026" style="width:100%;max-width:${W}px;height:auto">${bands}${lab(lp, x0, "end")}${lab(rp, x1, "start")}</svg></div>
     ${tables}`;
 }
 document.getElementById("movesBtn").addEventListener("click", e => {
