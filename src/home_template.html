@@ -43,11 +43,16 @@ section.block { margin-top: 64px; padding-top: 20px; border-top: 2px solid var(-
 .three h3 { font: 600 1rem var(--sans); margin: 0 0 8px; }
 .rows { list-style: none; padding: 0; margin: 0; font-size: .92rem; }
 .rows li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--grid); }
+.rows li[hidden] { display: none; }  /* display:flex above would override the hidden attribute */
 .rows li a { color: var(--ink); text-decoration: none; }
 .rows li a:hover { text-decoration: underline; }
 .rows li span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .showmore { margin-top: 8px; font: inherit; font-size: .9rem; background: none; border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; color: var(--ink); cursor: pointer; }
 .showmore:hover { background: var(--hover); }
+.sub3 { font: 600 1rem var(--sans); margin: 28px 0 8px; }
+.ages { position: relative; max-width: 1000px; }
+.ages svg { width: 100%; height: auto; display: block; font: 13px var(--sans); fill: var(--muted); touch-action: pan-y; }
+.ages .tip { position: absolute; top: 0; background: var(--ink); color: var(--paper); font-size: .85rem; padding: 4px 8px; border-radius: 4px; white-space: nowrap; pointer-events: none; }
 .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
 .how p { margin: 4px 0 0; color: var(--muted); }
 .how strong { font: 600 1.05rem var(--serif); }
@@ -73,6 +78,8 @@ footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px)
   <section class="block">
     <h2>Volby 2026 v číslech</h2>
     <div class="nums" id="nums"></div>
+    <h3 class="sub3">Věk kandidátů</h3>
+    <div id="ages" class="ages"></div>
   </section>
 
   <section class="block">
@@ -104,6 +111,9 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&
 const num = x => Number(x).toLocaleString("cs-CZ");
 const pct = (a, b) => Math.round(100 * a / b) + " %";
 const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+// first 10 rows visible, the rest (up to 50) behind a button
+const more = rows => `<ul class="rows">${rows.map((r, i) => i < 10 ? r : r.replace("<li>", "<li hidden>")).join("")}</ul>`
+  + (rows.length > 10 ? `<button class="showmore" type="button">Zobrazit dalších ${rows.length - 10}</button>` : "");
 
 document.getElementById("big").innerHTML = S.big.map(([k, n]) => `<a href="obec/${k}.html">${esc(n)}</a>`).join("");
 document.getElementById("nums").innerHTML = [
@@ -111,24 +121,44 @@ document.getElementById("nums").innerHTML = [
   [pct(S.women, S.women + S.men), "žen mezi kandidáty"], [pct(S.again, S.cands), "kandidovalo už dříve"],
   [pct(S.inc, S.e22), "zvolených v roce 2022 kandiduje znovu"], [num(S.long), "kandiduje od roku 2010 nebo dřív"],
 ].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
-// first 5 rows visible, the rest (up to 50) behind a button
-const more = rows => `<ul class="rows">${rows.map((r, i) => i < 5 ? r : r.replace("<li>", "<li hidden>")).join("")}</ul>`
-  + (rows.length > 5 ? `<button class="showmore" type="button">Zobrazit dalších ${rows.length - 5}</button>` : "");
-const row = r => `<li><a href="obec/${r[4]}.html">${esc(r[2])}, ${esc(r[3])}</a><span>medián ${String(r[0]).replace(".", ",")} let</span></li>`;
+// age distribution of all 2026 candidates: one series, so no legend; hover shows the exact count
+(() => {
+  const A = S.age_hist, n = A.n, max = Math.max(...n), W = 1000, H = 220, pl = 8, pb = 26, pt = 26;
+  const x = i => pl + i * (W - 2 * pl) / (n.length - 1), y = v => pt + (H - pt - pb) * (1 - v / max);
+  const line = n.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+  const ticks = [20, 30, 40, 50, 60, 70, 80, 90].map(a => `<text x="${x(a - A.from)}" y="${H - 6}" text-anchor="middle">${a === 90 ? "90+" : a}</text>`).join("");
+  const mx = x(A.mean - A.from);
+  document.getElementById("ages").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Rozložení věku kandidátů 2026, průměr ${String(A.mean).replace(".", ",")} let">
+    <line x1="${pl}" x2="${W - pl}" y1="${H - pb}" y2="${H - pb}" stroke="var(--rule)"/>
+    <path d="${line}L${x(n.length - 1)},${H - pb}L${x(0)},${H - pb}Z" fill="var(--accent)" fill-opacity=".14"/>
+    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    <line x1="${mx}" x2="${mx}" y1="${pt - 8}" y2="${H - pb}" stroke="var(--ink)" stroke-dasharray="3 3"/>
+    <text x="${mx + 6}" y="${pt - 10}" style="fill:var(--ink)">průměr ${String(A.mean).replace(".", ",")} let</text>
+    ${ticks}<line id="agecur" y1="${pt}" y2="${H - pb}" stroke="var(--ink)" stroke-opacity=".35" style="display:none"/>
+    <rect x="0" y="0" width="${W}" height="${H}" fill="transparent" id="agehit"/></svg><div class="tip" id="agetip" hidden></div>`;
+  const svg = document.querySelector("#ages svg"), tip = document.getElementById("agetip"), cur = document.getElementById("agecur");
+  svg.addEventListener("pointermove", e => {
+    const r = svg.getBoundingClientRect(), i = Math.max(0, Math.min(n.length - 1, Math.round(((e.clientX - r.left) / r.width * W - pl) / (W - 2 * pl) * (n.length - 1))));
+    cur.setAttribute("x1", x(i)); cur.setAttribute("x2", x(i)); cur.style.display = "";
+    tip.hidden = false; tip.textContent = `${A.from + i}${A.from + i === 90 ? " a více" : ""} let: ${num(n[i])} kandidátů`;
+    tip.style.left = Math.min(r.width - 160, Math.max(0, x(i) / W * r.width - 60)) + "px";
+  });
+  svg.addEventListener("pointerleave", () => { tip.hidden = true; cur.style.display = "none"; });
+})();
+const row = r => `<li><a href="obec/${r[4]}.html">${esc(r[2])}, ${esc(r[3])}</a><span>průměr ${String(r[0]).replace(".", ",")} let</span></li>`;
 document.getElementById("facts").innerHTML = `
   <div><h3>Nejmladší kandidátky</h3>${more(S.young.map(row))}</div>
   <div><h3>Nejstarší kandidátky</h3>${more(S.old.map(row))}</div>
   <div><h3>Nejvíc kandidátek</h3>${more(S.most_lists.map(r => `<li><a href="obec/${r[2]}.html">${esc(r[1])}</a><span>${r[0]} kandidátek</span></li>`))}</div>
   <p class="note" style="grid-column:1/-1">Věk: kandidátky s aspoň 10 kandidáty. Počet kandidátek: jen kandidátky s aspoň dvěma kandidáty, bez samostatně kandidujících jednotlivců.</p>`;
-document.querySelectorAll(".showmore").forEach(b => b.addEventListener("click", () => {
-  b.previousElementSibling.querySelectorAll("li[hidden]").forEach(li => li.hidden = false); b.remove(); }));
+
 
 const O = S.occ, slug = c => "s-" + c.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
 const orow = r => `<li><a href="povolani.html#${slug(r[3])}">${esc(r[0])}</a><span>${Math.round(r[2] * 100)} % zvoleno z ${num(r[1])}</span></li>`;
 document.getElementById("occsub").textContent = `Podíl zvolených podle povolání, které kandidáti uvedli, ve volbách 2002–2022. Průměr všech kandidátů je ${Math.round(O.base * 100)} %.`;
 document.getElementById("occ").innerHTML = `
-  <div><h3>Nejčastěji zvolení</h3><ul class="rows">${O.top.map(orow).join("")}</ul></div>
-  <div><h3>Nejméně často zvolení</h3><ul class="rows">${O.bottom.map(orow).join("")}</ul></div>
+  <div><h3>Nejčastěji zvolení</h3>${more(O.top.map(orow))}</div>
+  <div><h3>Nejméně často zvolení</h3>${more(O.bottom.map(orow))}</div>
   <p class="note" style="grid-column:1/-1">Jen povolání s aspoň ${num(O.min)} kandidaturami, bez veřejných funkcí jako starosta. Část rozdílů dělá velikost obce: v malých obcích bývá zvolená větší část kandidátů, a tam je víc zemědělců.</p>`;
 
 const keyed = idx.map(r => [norm(r[1] + " " + r[2]), r]);
@@ -160,6 +190,8 @@ async function showPeople() {
     <span>${esc(r[2])}${r[5] ? `, dříve kandidoval/a ${r[5]}×` : ""}</span></a></li>`).join("");
 }
 q.addEventListener("input", () => { show(); showPeople(); });
+document.querySelectorAll(".showmore").forEach(b => b.addEventListener("click", () => {
+  b.previousElementSibling.querySelectorAll("li[hidden]").forEach(li => li.hidden = false); b.remove(); }));
 </script>
 </body>
 </html>

@@ -55,8 +55,8 @@ table.tx { width: 100%; border-collapse: collapse; font-size: .9rem; margin: 0; 
 table.tx th { text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; padding: 0 8px 6px 0; border-bottom: 1px solid var(--rule); }
 table.tx td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--grid); vertical-align: middle; }
 table.tx .r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-table.tx td.zv { min-width: 9.5rem; }
-.bar { display: inline-block; position: relative; width: 4.5rem; height: 6px; background: var(--grid); border-radius: 3px; margin-right: 8px; vertical-align: middle; }
+table.tx td.zv { width: 6rem; padding-left: 12px; }
+.bar { display: block; position: relative; width: 100%; height: 6px; background: var(--grid); border-radius: 3px; }
 .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); border-radius: 3px; }
 .bar b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--stamp); }
 footer { margin-top: 56px; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--rule); padding-top: 12px; }
@@ -83,12 +83,12 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&
 const slug = c => "s-" + (c.name || "nezarazeno").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
 function chart(c) {
-  const W = 560, H = 150, padL = 44, padB = 22, bw = 24, ys = c.years;
+  const W = 560, H = 150, padL = 44, padB = 22, padT = 14, bw = 24, ys = c.years;
   const max = Math.max(...ys.map(y => y.n)) || 1;
   const step = Math.pow(10, Math.floor(Math.log10(max)));
   const top = Math.ceil(max / step) * step;
   const x = i => padL + (i + .5) * (W - padL) / ys.length;
-  const y = v => (H - padB) * (1 - v / top);
+  const y = v => padT + (H - padB - padT) * (1 - v / top);
   const grid = [0, top / 2, top].map(v => `<line x1="${padL}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/>
     <text x="${padL - 6}" y="${y(v) + 4}" text-anchor="end">${num(v)}</text>`).join("");
   const bars = ys.map((d, i) => {
@@ -121,9 +121,9 @@ function card(c) {
     ${chart(c)}${table}
     <div class="two">
       <div><h3>Jak to kandidáti píšou</h3>
-        <table class="tx"><thead><tr><th>Zápis povolání</th><th class="r">Kandidatur</th><th class="r">Zvoleno</th></tr></thead><tbody>
+        <table class="tx"><thead><tr><th>Zápis povolání</th><th class="r">Kandidatur</th><th class="r" colspan="2">Zvoleno</th></tr></thead><tbody>
         ${c.texts.map(([t, n, r], i) => `<tr${i >= 8 ? " hidden" : ""}><td>${esc(t || "(neuvedeno)")}</td><td class="r">${num(n)}</td>
-          <td class="r zv">${r == null ? "–" : `<span class="bar" aria-hidden="true"><i style="width:${Math.min(100, r * 100)}%"></i><b style="left:${c.base * 100}%"></b></span>${pct(r)}`}</td></tr>`).join("")}
+          <td class="zv">${r == null ? "" : `<span class="bar" aria-hidden="true"><i style="width:${Math.min(100, r * 100)}%"></i><b style="left:${c.base * 100}%"></b></span>`}</td><td class="r">${r == null ? "–" : pct(r)}</td></tr>`).join("")}
         </tbody></table>
         ${c.texts.length > 8 ? `<button class="showmore" type="button">Zobrazit dalších ${c.texts.length - 8}</button>` : ""}
         <p class="note">Zvoleno: kolik procent kandidatur v letech 2002–2022 skončilo zvolením. Svislá čárka je průměr všech kandidátů (${pct(c.base)}).</p></div>

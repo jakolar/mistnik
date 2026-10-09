@@ -39,6 +39,7 @@ h1 { font: 600 clamp(2rem, 5vw, 3rem)/1.1 var(--serif); margin: 4px 0 4px; }
 .scrollhint button { font: inherit; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: 4px; padding: 4px 12px; cursor: pointer; min-height: 32px; }
 .list { border-top: 3px solid var(--ink); }
 .list header { padding: 10px 0 8px; }
+a.no { color: inherit; text-decoration: none; } a.no:hover { text-decoration: underline; }
 .list .no { font: 600 .85rem var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; }
 .list h2 { font: 600 1.2rem/1.25 var(--serif); margin: 2px 0 6px; }
 .stats { font-size: .875rem; color: var(--muted); margin: 0; }
@@ -195,9 +196,22 @@ function histLine(p) {
 
 function prev22(p) { return p.history.find(h => h.year === "2022"); }
 // list names differ only in quotes or case between years („Ženy pro Hnojice“ / „Ženy pro Hnojice”)
-const nl = s => (s || "").replace(/[„“”"‚‘’'«»]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+const nl = s => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 const listName = new Map(people.map(p => [nl(p.list), p.list]));
 const key = s => listName.get(nl(s)) || s;  // one display name per list: this year's spelling
+// a list is its people: when most of a 2022 list's returning candidates are together on one 2026 list (or most of that
+// 2026 list's returning candidates came from it), it is the same group renamed ("Pro Manětínsko" -> "Společně pro MANĚTÍNSKO")
+const continued = (() => {
+  const pair = new Map(), from = new Map(), into = new Map(), inc = (m, k) => m.set(k, (m.get(k) || 0) + 1);
+  for (const p of people) {
+    const h = prev22(p);
+    if (!h?.here) continue;
+    const a = nl(h.here.list), b = nl(p.list);
+    inc(pair, a + "\u0000" + b); inc(from, a); inc(into, b);
+  }
+  return new Set([...pair].filter(([k, n]) => { const [a, b] = k.split("\u0000"); return n >= 2 && (n >= from.get(a) / 2 || n >= into.get(b) / 2); }).map(([k]) => k));
+})();
+const ownName = (p, list) => { const l = " " + nl(list) + " "; return nl(p.name).split(" ").filter(w => w.length >= 4).some(w => l.includes(" " + w + " ")); };
 // where the candidate stood in 2022 in this council: {kind: new|break|elsewhere|stay|moved, list}
 function move22(p) {
   const h = prev22(p);
@@ -205,7 +219,11 @@ function move22(p) {
   const here = h.here;
   if (!here) return {kind: "elsewhere", town: h.town};
   const now = p.history.at(-1);
-  const same = (here.lid || here.list) === (now.lid || p.list) || nl(here.list) === nl(p.list) || (here.parties || []).some(x => (now.parties || []).includes(x));  // renamed list of the same party
+  const pa = here.parties || [], pb = now.parties || [];
+  const otherParty = pa.length && pb.length && !pa.some(x => pb.includes(x));  // e.g. STAN -> ANO stays a move even if the group went together
+  const same = (here.lid || here.list) === (now.lid || p.list) || nl(here.list) === nl(p.list) || pa.some(x => pb.includes(x))  // renamed list of the same party
+    || (!otherParty && continued.has(nl(here.list) + "\u0000" + nl(p.list)))
+    || ownName(p, here.list) && ownName(p, p.list);  // one-person list under the candidate's own name, spelled differently
   return {kind: same ? "stay" : "moved", list: here.list};
 }
 function moveLine(p) {
@@ -213,7 +231,7 @@ function moveLine(p) {
   return m.kind === "new" ? ""
     : m.kind === "break" ? `<span class="mv stay">v roce 2022 nekandidoval${a}</span>`
     : m.kind === "elsewhere" ? `<span class="mv stay">v roce 2022 kandidoval${a} jinde (${esc(m.town)})</span>`
-    : m.kind === "stay" ? `<span class="mv stay">zůstal${a} u kandidátky ${esc(m.list)}</span>`
+    : m.kind === "stay" ? `<span class="mv stay">${nl(m.list) === nl(p.list) ? `zůstal${a} u kandidátky ${esc(m.list)}` : `zůstal${a} se svou skupinou, v roce 2022 kandidovala jako ${esc(m.list)}`}</span>`
     : `<span class="mv moved">→ přešel${a} z kandidátky ${esc(m.list)}</span>`;
 }
 function row(p) {
@@ -231,14 +249,14 @@ function row(p) {
 function listStats(ps, no) {
   const st = meta.ages[String(no)];
   const sorted = ps.map(p => p.age).sort((a, b) => a - b);
-  const med = st ? st[0] : sorted[Math.floor((sorted.length - 1) / 2)];
+  const med = st ? st[0] : Math.round(10 * sorted.reduce((a, b) => a + b, 0) / sorted.length) / 10;
   const younger = st ? Math.round(st[1] * 100) : null;
   const ageNote = younger == null ? "" : younger >= 50 ? `mladší než ${younger} % kandidátek v ČR` : `starší než ${100 - younger} % kandidátek v ČR`;
   const b = [0, 0, 0, 0]; ps.forEach(p => b[p.age < 30 ? 0 : p.age < 45 ? 1 : p.age < 60 ? 2 : 3]++);
   const prior = ps.filter(p => p.ran > 0).length, w = ps.filter(p => p.gender === "Z").length, m = ps.filter(p => p.gender === "M").length;
   const unk = ps.length - w - m;
   return `<div class="kf"><div><b>${ps.length}</b><span>${ps.length === 1 ? "kandidát" : ps.length <= 4 ? "kandidáti" : "kandidátů"}</span></div>
-      <div><b>${String(med).replace(".", ",")}</b><span>medián věku${ageNote ? `<br>${ageNote}` : ""}</span></div>
+      <div><b>${String(med).replace(".", ",")}</b><span>průměrný věk${ageNote ? `<br>${ageNote}` : ""}</span></div>
       <div><b>${w}/${m}</b><span>žen/mužů${unk ? `, ${unk} nezjištěno` : ""}</span></div></div>
     <div class="ages" title="Věkové složení">${b.map(x => `<i style="flex:${x}"></i>`).join("")}</div>
     <div class="ageleg"><span>do 30: ${b[0]}</span><span>30–44: ${b[1]}</span><span>45–59: ${b[2]}</span><span>60+: ${b[3]}</span></div>
@@ -256,7 +274,7 @@ document.getElementById("council").innerHTML = `<span>${pl(full.length + solo.le
   <p>Počítáno ze zvolených ve volbách 2022, změny během období (rezignace, náhradníci) data nezachycují.</p></details>` : ""}`;
 
 document.getElementById("lists").innerHTML = full.map(([no, ps]) => `<section class="list" id="l${no}" data-no="${no}">
-  <header><span class="no">Kandidátka č. ${no}</span><h2>${esc(ps[0].list)}</h2>${listStats(ps, no)}</header>
+  <header><a class="no" href="#kandidatka-${no}" title="Odkaz na tuto kandidátku">Kandidátka č. ${no}</a><h2>${esc(ps[0].list)}</h2>${listStats(ps, no)}</header>
   ${ps.map((p, i) => i < SHOW ? row(p) : row(p).replace('class="row"', 'class="row" hidden')).join("")}
   ${ps.length > SHOW ? `<button class="more" type="button">Zobrazit všech ${ps.length}</button>` : ""}</section>`).join("");
 document.getElementById("nk").innerHTML = solo.length ? `<h2>Kandidátky s jediným kandidátem</h2><p class="stats">Nezávislí kandidáti a strany s jedním kandidátem. Číslo kandidátky je u jména.</p>
@@ -286,7 +304,8 @@ function moveTables() {
   for (const p of people) {
     const m = move22(p);
     if (m.kind === "new") continue;
-    const t = by.get(p.list) || {stay: 0, src: {}, elsewhere: 0, break: 0, n: 0};
+    const t = by.get(p.list) || {stay: 0, src: {}, ren: new Set(), elsewhere: 0, break: 0, n: 0};
+    if (m.kind === "stay" && nl(m.list) !== nl(p.list)) t.ren.add(m.list);
     t.n++;
     if (m.kind === "moved") t.src[key(m.list)] = (t.src[key(m.list)] || 0) + 1; else t[m.kind]++;
     by.set(p.list, t);
@@ -298,7 +317,7 @@ function moveTables() {
     const moved = Object.entries(t.src).sort((a, b) => b[1] - a[1]);
     const nm = moved.reduce((a, [, n]) => a + n, 0);
     const parts = [];
-    if (t.stay) parts.push(`${pl(t.stay, "zůstal", "zůstali", "zůstalo")} ze stejné kandidátky`);
+    if (t.stay) parts.push(`${pl(t.stay, "zůstal", "zůstali", "zůstalo")} ze stejné kandidátky` + (t.ren.size ? ` (v roce 2022 pod názvem ${[...t.ren].map(esc).join(", ")})` : ""));
     for (const [k, n] of moved) parts.push(`${pl(n, "přešel", "přešli", "přešlo")} z kandidátky ${esc(k)}`);
     if (t.elsewhere) parts.push(`${t.elsewhere} v roce 2022 ${t.elsewhere === 1 ? "kandidoval" : "kandidovali"} jinde (v jiné obci nebo městské části)`);
     if (t.break) parts.push(`${t.break} ${t.break === 1 ? "kandidoval" : "kandidovali"} dříve, ale ne v roce 2022`);
@@ -369,7 +388,8 @@ function selectTab(id) {
   tabs.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", b.dataset.t === id));
   try { sessionStorage.setItem("tab:" + location.pathname, id); } catch (e) {}
 }
-tabs.addEventListener("click", e => { const b = e.target.closest("button"); if (b) selectTab(b.dataset.t); });
+tabs.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; selectTab(b.dataset.t);
+  if (b.dataset.t.startsWith("l")) history.replaceState(null, "", location.pathname + location.search + "#kandidatka-" + b.dataset.t.slice(1)); });
 let saved = null; try { saved = sessionStorage.getItem("tab:" + location.pathname); } catch (e) {}
 selectTab(panes.some(p => p.id === saved) ? saved : panes[0]?.id);
 document.querySelectorAll(".more").forEach(b => b.addEventListener("click", () => {
@@ -429,15 +449,29 @@ function openProfile(id, push) {
   document.getElementById("profBody").innerHTML = profile(p); if (!dlg.open) dlg.showModal();
   if (push) history.pushState({p: id}, "", "#" + encodeURIComponent(id));
 }
-window.addEventListener("popstate", () => { const id = decodeURIComponent(location.hash.slice(1)); if (byId[id]) openProfile(id, false); else if (dlg.open) dlg.close(); });
-if (location.hash.length > 1) openProfile(decodeURIComponent(location.hash.slice(1)), false);
+// every list has its own URL: obec/<kod>#kandidatka-<n>
+const listHash = () => (location.hash.match(/^#kandidatka-(\d+)$/) || [])[1];
+function showList(no) {
+  const el = document.getElementById("l" + no); if (!el) return;
+  selectTab("l" + no);
+  el.scrollIntoView({block: "start", inline: "start"});
+}
+function route() {
+  const no = listHash();
+  if (no) { if (dlg.open) dlg.close(); showList(no); return; }
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (byId[id]) openProfile(id, false); else if (dlg.open) dlg.close();
+}
+window.addEventListener("popstate", route);
+window.addEventListener("hashchange", route);
+if (location.hash.length > 1) route();
 document.addEventListener("click", e => {
   const r = e.target.closest(".row");
   if (r) { lastRow = r; openProfile(r.dataset.id, true); return; }
   if (e.target.closest(".close")) dlg.close();
 
 });
-dlg.addEventListener("close", () => { if (location.hash) history.replaceState(null, "", location.pathname); lastRow?.focus(); });
+dlg.addEventListener("close", () => { if (location.hash && !listHash()) history.replaceState(null, "", location.pathname + location.search); lastRow?.focus(); });
 dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
 </script>
 </body>

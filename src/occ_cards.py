@@ -276,7 +276,8 @@ def main():
     past.assign(group=[D.gname[D.text == t].iat[0] for t in past.index]).round(4).to_csv(DER / "occ_rank.csv")  # open data
     row = lambda t, r: [t, int(r.n), round(float(r.rate), 3), D.gname[D.text == t].iat[0]]
     rank = {"min": RANK_MIN, "base": round(float(D[D.year < 2026].elected.mean()), 3),
-            "top": [row(t, r) for t, r in past[::-1].head(6).iterrows()], "bottom": [row(t, r) for t, r in past.head(6).iterrows()]}
+            "top": [row(t, r) for t, r in past[::-1].head(min(50, len(past) // 2)).iterrows()],
+            "bottom": [row(t, r) for t, r in past.head(min(50, len(past) // 2)).iterrows()]}  # halves never overlap
     json.dump({"text": dict(zip(D.text, D.gname)), "n2026": D[D.year == 2026].gname.value_counts().to_dict(), "rank": rank},
               open(DER / "occ_groups.json", "w"), ensure_ascii=False)
     per_year = D.groupby("year").size()

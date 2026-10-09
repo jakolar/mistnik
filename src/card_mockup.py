@@ -56,12 +56,12 @@ def list_parties(cid):
 
 
 def list_age_stats(C):
-    """{(KODZASTUP, list_no): (median age, share of lists in CZ that are older)} for 2026 lists with >= 5 candidates."""
+    """{(KODZASTUP, list_no): (mean age, share of lists in CZ that are older)} for 2026 lists with >= 5 candidates."""
     b = C[C.year == "2026"].assign(list_no=lambda d: d.id.str.split(":").str[3].astype(int), age=lambda d: d.VEK.astype(int))
-    g = b.groupby(["KODZASTUP", "list_no"]).age.agg(["median", "size"])
+    g = b.groupby(["KODZASTUP", "list_no"]).age.agg(["mean", "size"])
     g = g[g["size"] >= 5]
-    ranks = g["median"].rank(pct=True, method="average")
-    return {k: (float(m), float(1 - r)) for k, m, r in zip(g.index, g["median"], ranks)}
+    ranks = g["mean"].rank(pct=True, method="average")
+    return {k: (round(float(m), 1), float(1 - r)) for k, m, r in zip(g.index, g["mean"], ranks)}
 
 
 def extra_fields():

@@ -171,6 +171,9 @@ def main():
     stats["most_lists"] = sorted(nlists, reverse=True)[:50]
     stats["councils"] = len(index)
     big = ["554782", "582786", "554821", "554791", "563889", "500496", "544256", "569810", "554804", "555134"]  # ten largest cities
+    ages = b26.age.clip(upper=90)
+    stats["age_hist"] = {"from": int(ages.min()), "n": [int(x) for x in ages.value_counts().sort_index().reindex(range(int(ages.min()), 91), fill_value=0)],
+                         "mean": round(float(b26.age.mean()), 1), "median": float(b26.age.median())}  # 90 = 90 and older
     stats["occ"] = json.load(open(ROOT / "data/derived/occ_groups.json", encoding="utf-8"))["rank"]
     stats["big"] = [[k, council_name.get(k, k)] for k in big if (SITE / "obec" / f"{k}.html").exists()]
     home = (ROOT / "src/home_template.html").read_text().replace("__INDEX__", js(index)).replace("__STATS__", js(stats))
