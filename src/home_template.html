@@ -115,7 +115,7 @@ const S = __STATS__;
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const num = x => Number(x).toLocaleString("cs-CZ");
 const pct = (a, b) => Math.round(100 * a / b) + " %";
-const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const norm = s => s.normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/['’´`]/g, "").toLowerCase();
 // first 10 rows visible, the rest (up to 50) behind a button
 const more = rows => `<ul class="rows">${rows.map((r, i) => i < 10 ? r : r.replace("<li>", "<li hidden>")).join("")}</ul>`
   + (rows.length > 10 ? `<button class="showmore" type="button">Zobrazit dalších ${rows.length - 10}</button>` : "");
@@ -125,6 +125,7 @@ document.getElementById("nums").innerHTML = [
   [num(S.councils), "obcí a městských částí"], [num(S.lists), "kandidátek"], [num(S.cands), "kandidátů"],
   [pct(S.women, S.women + S.men), "žen mezi kandidáty"], [pct(S.again, S.cands), "kandidovalo už dříve"],
   [pct(S.inc, S.e22), "zvolených v roce 2022 kandiduje znovu"], [num(S.long), "kandiduje od roku 2010 nebo dřív"],
+  [num(S.seventh), `<a href="kandiduji-posedme.html">kandiduje posedmé, ve všech volbách od roku 2002</a>`],
   [num(S.stalwarts), `<a href="zvoleni-od-2002.html">zvoleno ve všech volbách od roku 2002</a>`],
 ].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
 // age distribution per election as share of that year's candidates: 2026 highlighted, earlier years in grey
@@ -220,7 +221,9 @@ function show() {
 }
 const shardCache = {};
 async function shard(k) {
-  if (!(k in shardCache)) shardCache[k] = fetch(`hledat/${encodeURIComponent(k.replace(/ /g, "_"))}.json`).then(r => r.ok ? r.json() : []).catch(() => []);
+  if (!(k in shardCache)) shardCache[k] = fetch(`hledat/${encodeURIComponent(k.replace(/ /g, "_"))}.json`)
+    .then(r => r.ok || r.status === 404 ? (r.ok ? r.json() : []) : Promise.reject())
+    .catch(() => { delete shardCache[k]; return []; });  // network errors are retried on the next keystroke
   return shardCache[k];
 }
 const ppl = document.getElementById("people"), ph = document.getElementById("ph");

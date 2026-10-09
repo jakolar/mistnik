@@ -300,7 +300,7 @@ def main():
             "sizes": [[lab, float(s)] for (_, _, lab), s in zip(SIZE, sizes)],
             # per text: candidacies 2002-2026 and share elected 2002-2022 (2026 not decided yet)
             "texts": [[t_, int(c_), round(float(past[past.text == t_].elected.mean()), 3) if (past.text == t_).any() else None]
-                      for t_, c_ in g.text.value_counts().head(50).items()],
+                      for t_, c_ in g.text.value_counts().head(50).items() if c_ >= 5],  # a share of 1-4 candidacies says nothing
             "variants": int(g.text.nunique()), "kw": float(g.kw.mean()),
             "func": float(g.func.mean()), "note": NOTES.get(cat, ""),
         })

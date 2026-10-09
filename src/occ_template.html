@@ -73,7 +73,7 @@ footer { margin-top: 56px; color: var(--muted); font-size: .8rem; border-top: 1p
   <input id="q" type="search" placeholder="například učitel, lékař, zemědělec" autocomplete="off">
   <div id="index"></div>
   <div id="cards"></div>
-  <footer>Zdroj: ČSÚ, kandidátní listiny 2002–2026, <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">licence CC BY 4.0</a>; klasifikace CZ-ISCO. Třídění a podíly jsou odvozené údaje, ne oficiální statistika ČSÚ. 5 000 nejčastějších zápisů zařadil model Jev, zkontroloval je druhý model (Gemini) a sporné případy ručně upravujeme. Řidší zápisy jsou zařazeny podle klíčových slov ze zápisů už zařazených. Místník připravil Jan Antonín Kolář.</footer>
+  <footer>Zdroj: ČSÚ, kandidátní listiny 2002–2026, <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">licence CC BY 4.0</a>; klasifikace CZ-ISCO. Třídění a podíly jsou odvozené údaje, ne oficiální statistika ČSÚ. 5 000 nejčastějších zápisů zařadil model Jev, zkontroloval je druhý model (Gemini) a sporné případy ručně upravujeme. Řidší zápisy jsou zařazeny podle klíčových slov ze zápisů už zařazených. Chyba nebo námitka: <a href="mailto:__CONTACT__">__CONTACT__</a>. <a href="metodika.html">Jak to počítáme</a>. Místník připravil Jan Antonín Kolář.</footer>
 </main>
 <script>
 const cards = __DATA__;
@@ -159,8 +159,10 @@ document.addEventListener("click", e => {
   const b = e.target.closest(".showmore"); if (!b) return;
   b.previousElementSibling.querySelectorAll("tr[hidden]").forEach(r => r.hidden = false); b.remove();
 });
+const fold = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+document.querySelectorAll("[data-search]").forEach(el => el.dataset.search = fold(el.dataset.search));
 q.addEventListener("input", () => {
-  const v = q.value.trim().toLowerCase();
+  const v = fold(q.value.trim());
   document.querySelectorAll("[data-search]").forEach(el => el.hidden = v && !el.dataset.search.includes(v));
 });
 </script>

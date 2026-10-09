@@ -78,7 +78,7 @@ def main():
     tpl = (ROOT / "src/obec_template.html").read_text()
     index = []
     stats = {"cands": 0, "lists": 0, "women": 0, "men": 0, "new": 0, "long": 0, "again": 0, "inc": 0, "e22": 0}
-    list_ages, nlists, stalwarts = [], [], []
+    list_ages, nlists, stalwarts, seventh = [], [], [], []
     for kod, ballot in b26.groupby("KODZASTUP"):
         people = []
         for r in ballot.assign(list_no=ballot.id.str.split(":").str[3].astype(int),
@@ -88,7 +88,8 @@ def main():
             rows = []
             for y in sorted({h.year for h in hrows}):
                 hy = [h for h in hrows if h.year == y]
-                h = sorted(hy, key=lambda h: h.MANDAT)[0]
+                here = next((x for x in hy if x.KODZASTUP == kod), None)  # city + city part double runs: the list in this council
+                h = here or sorted(hy, key=lambda h: h.MANDAT)[0]
                 link = next((why_b[x.id] for x in hy if x.id in why_b and why_b[x.id][0].id_a in ids), None)
                 votes, skip, vrank, vn, vshare = extra.get(h.id, ("", "", None, None, None))
                 rows.append({"why": (reasons(link[0]) + (["potvrdil Jev"] if link[1] == "auto_jev" else [])) if link else [],
@@ -101,7 +102,6 @@ def main():
                              "party": pn.get((y, h.PSTRANA), ""),
                              "elected": any(x.MANDAT == "A" for x in hy),
                              "elected_here": any(x.MANDAT == "A" and x.KODZASTUP == kod for x in hy)})
-                here = next((x for x in hy if x.KODZASTUP == kod), None)  # city + city part double runs: the list in this council
                 if y == "2022":
                     rows[-1]["here"] = {"list": here.NAZEVCELK, "lid": list_id(here.NAZEVCELK), "parties": list_parties(here.id)} if here else None
             past = [x for x in rows if x["year"] != "2026"]
@@ -140,8 +140,11 @@ def main():
         index.append([kod, town, okres, len(people), sum(p["ran"] > 0 for p in people)])
         for p in people:  # elected in this council in all six elections 2002-2022 and running again
             past = [h for h in p["history"] if h["year"] != "2026"]
-            if len(past) == 6 and all(h["elected_here"] for h in past):
-                stalwarts.append([p["name"], p["age"], town, okres, kod, p["id"], p["list"]])
+            row = [p["name"], p["age"], town, okres, kod, p["id"], p["list"]]
+            if len(past) == 6:
+                seventh.append(row)
+                if all(h["elected_here"] for h in past):
+                    stalwarts.append(row)
         stats["cands"] += len(people)
         stats["lists"] += len({p["list_no"] for p in people})
         sizes = collections.Counter(p["list_no"] for p in people)
@@ -149,7 +152,7 @@ def main():
         stats["women"] += sum(p["gender"] == "Z" for p in people)
         stats["men"] += sum(p["gender"] == "M" for p in people)
         stats["new"] += sum(p["ran"] == 0 and not p["namesake"] for p in people)
-        stats["long"] += sum(p["ran"] >= 4 for p in people)
+        stats["long"] += sum(bool(p["since"]) and int(p["since"]) <= 2010 for p in people)
         stats["again"] += sum(p["ran"] > 0 for p in people)
         stats["inc"] += meta["running"]
         stats["e22"] += meta["elected22"]
@@ -164,9 +167,11 @@ def main():
     for r in b26.itertuples(index=False):
         hrows = hist[r.person]
         ran = len({h.year for h in hrows if h.year != "2026"})
-        key = L.name_norm(r.PRIJMENI)[:2] or "_"
-        shards[key].append([f"{r.TITULPRED} {r.JMENO} {r.PRIJMENI} {r.TITULZA}".strip(), int(r.VEK), council_name.get(r.KODZASTUP, ""),
-                            r.KODZASTUP, r.id, ran, L.name_norm(f"{r.PRIJMENI} {r.JMENO}")])
+        sn = lambda s: L.name_norm(s).translate({ord(c): None for c in "'’´`"})  # O´Bryan, D’Amico -> obryan, damico
+        row = [f"{r.TITULPRED} {r.JMENO} {r.PRIJMENI} {r.TITULZA}".strip(), int(r.VEK), council_name.get(r.KODZASTUP, ""),
+               r.KODZASTUP, r.id, ran, sn(f"{r.PRIJMENI} {r.JMENO}")]
+        for key in {w[:2] for w in sn(r.PRIJMENI).split()} or {"_"}:  # Nováková Svobodová is found under both parts
+            shards[key].append(row)
     (SITE / "hledat").mkdir()
     for k, rows in shards.items():
         (SITE / "hledat" / f"{k.replace(' ', '_')}.json").write_text(js(rows))
@@ -191,21 +196,27 @@ def main():
     stats["age_years"] = [{"y": int(y), "mean": round(float(g.age.mean()), 1),
                            "share": [round(float(x), 5) for x in g.age.astype(int).value_counts(normalize=True).reindex(range(18, 91), fill_value=0)]}
                           for y, g in ay.groupby("year")]
-    stats["stalwarts"] = len(stalwarts)
-    (SITE / "zvoleni-od-2002.html").write_text((ROOT / "src/stalwarts_template.html").read_text()
-                                               .replace("__DATA__", js(sorted(stalwarts, key=lambda r: (r[3], r[2], r[0])))))
+    stats["stalwarts"], stats["seventh"] = len(stalwarts), len(seventh)
+    people_tpl = (ROOT / "src/stalwarts_template.html").read_text().replace("__CONTACT__", CONTACT)
+    for fname, rows, title, lead in (
+        ("zvoleni-od-2002.html", stalwarts, "Zvoleni ve všech volbách od roku 2002",
+         "Lidé, kteří byli do zastupitelstva své obce nebo městské části zvoleni ve všech šesti komunálních volbách od roku 2002 a letos kandidují znovu."),
+        ("kandiduji-posedme.html", seventh, "Kandidují posedmé",
+         "Lidé, kteří kandidovali ve všech šesti komunálních volbách od roku 2002 a letos kandidují posedmé. Dřívější kandidatury mohly být i v jiné obci.")):
+        (SITE / fname).write_text(people_tpl.replace("__TITLE__", title).replace("__LEAD__", lead)
+                                  .replace("__DATA__", js(sorted(rows, key=lambda r: (r[3], r[2], r[0])))))
     stats["occ"] = json.load(open(ROOT / "data/derived/occ_groups.json", encoding="utf-8"))["rank"]
     stats["big"] = [[k, council_name.get(k, k)] for k in big if (SITE / "obec" / f"{k}.html").exists()]
     home = (ROOT / "src/home_template.html").read_text().replace("__INDEX__", js(index)).replace("__STATS__", js(stats))
     (SITE / "index.html").write_text(home)
-    shutil.copy(ROOT / "data/mockup/povolani.html", SITE / "povolani.html")
+    (SITE / "povolani.html").write_text((ROOT / "data/mockup/povolani.html").read_text().replace("__CONTACT__", CONTACT))
     (SITE / "metodika.html").write_text((ROOT / "src/metodika.html").read_text().replace("__CONTACT__", CONTACT)
                                          .replace("__CONTROLLER__", CONTROLLER))
     import export_open_data
     export_open_data.main(CONTACT)
     # search engines: robots.txt + sitemap of every page (indexing approved by Jan 2026-10-09)
     base = "https://mistnik.cz"
-    urls = [f"{base}/", f"{base}/povolani", f"{base}/metodika", f"{base}/data", f"{base}/zvoleni-od-2002"] + [f"{base}/obec/{r[0]}" for r in index]
+    urls = [f"{base}/", f"{base}/povolani", f"{base}/metodika", f"{base}/data"]  # zvoleni-od-2002, kandiduji-posedme: noindex, not in the sitemap + [f"{base}/obec/{r[0]}" for r in index]
     (SITE / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n")
     (SITE / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {base}/sitemap.xml\n")

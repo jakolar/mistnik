@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Místník – zvoleni ve všech volbách od roku 2002</title>
+<title>Místník – __TITLE__</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -31,13 +31,14 @@ input { width: 100%; max-width: 480px; font: inherit; font-size: 1rem; padding: 
 <body>
 <main>
   <a class="back" href="index.html">← Místník</a>
-  <h1>Zvoleni ve všech volbách od roku 2002</h1>
-  <p class="lead">Lidé, kteří byli do zastupitelstva své obce nebo městské části zvoleni ve všech šesti komunálních volbách od roku 2002 a letos kandidují znovu.</p>
+  <h1>__TITLE__</h1>
+  <p class="lead">__LEAD__</p>
   <p>„Zvolen“ znamená zvolen ve volbách; nevíme, jestli dotyčný mandát vykonával celé období. Seznam je spíš dolní odhad: zahrnuje jen kandidatury, které jsme s jistotou spojili (<a href="metodika.html">jak to počítáme</a>).</p>
   <label for="q" style="font:600 .95rem var(--sans);display:block;margin:24px 0 6px">Hledat obec, okres nebo jméno</label>
   <input id="q" type="search" placeholder="například Olomouc nebo Novák" autocomplete="off">
   <p class="cnt" id="cnt"></p>
   <table><thead><tr><th>Jméno</th><th class="opt">Věk</th><th>Obec</th><th class="opt">Okres</th><th class="opt">Kandidátka 2026</th></tr></thead><tbody id="rows"></tbody></table>
+  <p style="font: .85rem/1.5 var(--sans); color: var(--muted); margin-top: 32px">Zdroj: Český statistický úřad, kandidátní listiny 2002–2026, <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">licence CC BY 4.0</a>. Spojení kandidatur jsou odvozené údaje, ne oficiální statistika ČSÚ. Chyba nebo námitka: <a href="mailto:__CONTACT__">__CONTACT__</a>. Místník připravil Jan Antonín Kolář.</p>
 </main>
 <script>
 const D = __DATA__;  // [name, age, town, okres, kod, id, list]
