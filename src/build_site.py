@@ -22,6 +22,14 @@ def js(obj):
     return json.dumps(obj, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
 
+def obec_desc(town, people):
+    """Search-result snippet for a municipality page, from the same data the page shows."""
+    lists = list(dict.fromkeys(p["list"] for p in people))
+    head = f"Kandidátky do zastupitelstva {town} 2026: {len(lists)} kandidátek, {len(people)} kandidátů"
+    names = ", ".join(lists[:4]) + (" a další" if len(lists) > 4 else "")
+    return f"{head} ({names}). Kdo kandiduje znovu, kdo byl zvolen v roce 2022 a kam kdo přešel."
+
+
 def main():
     C = pd.read_csv(L.DER / "cluster_persons.csv.gz", dtype=str, keep_default_na=False)
     want = ["id_a", "id_b", "decision", "geo", "cocand", "party", "titles", "occ", "same_list", "same_res", "second", "p", "list_party"]
@@ -75,6 +83,7 @@ def main():
     if SITE.exists():
         shutil.rmtree(SITE)  # build artefact, regenerated in full
     (SITE / "obec").mkdir(parents=True)
+    shutil.copy(ROOT / "src/og.png", SITE / "og.png")
     tpl = (ROOT / "src/obec_template.html").read_text()
     index = []
     stats = {"cands": 0, "lists": 0, "women": 0, "men": 0, "new": 0, "long": 0, "again": 0, "inc": 0, "e22": 0}
@@ -135,7 +144,8 @@ def main():
         meta = {"elected22": len(e22), "running": sum(p["incumbent"] for p in people), "leaving": leaving, "contact": CONTACT,
                 "ages": age_stats.get(kod, {})}
         town = council_name.get(kod, kod)
-        page = (tpl.replace("__TOWN__", html.escape(town)).replace("__DATA__", js(people)).replace("__META__", js(meta))
+        page = (tpl.replace("__DESC__", html.escape(obec_desc(town, people), quote=True)).replace("__KOD__", kod)
+                .replace("__TOWN__", html.escape(town)).replace("__DATA__", js(people)).replace("__META__", js(meta))
                 .replace("__CONTACT__", CONTACT))
         (SITE / "obec" / f"{kod}.html").write_text(page)
         okres = okres_name.get(rz26.at[kod, "OKRES"], "") if kod in rz26.index else ""
@@ -205,7 +215,7 @@ def main():
          "Lidé, kteří byli do zastupitelstva své obce nebo městské části zvoleni ve všech šesti komunálních volbách od roku 2002 a letos kandidují znovu."),
         ("kandiduji-posedme.html", seventh, "Kandidují posedmé",
          "Lidé, kteří kandidovali ve všech šesti komunálních volbách od roku 2002 a letos kandidují posedmé. Dřívější kandidatury mohly být i v jiné obci.")):
-        (SITE / fname).write_text(people_tpl.replace("__TITLE__", title).replace("__LEAD__", lead)
+        (SITE / fname).write_text(people_tpl.replace("__SLUG__", fname[:-5]).replace("__TITLE__", title).replace("__LEAD__", lead)
                                   .replace("__DATA__", js(sorted(rows, key=lambda r: (r[3], r[2], r[0])))))
     # share elected by age band, elections 2002-2022 (2026 not decided yet)
     ea = C[C.year != "2026"].assign(age=pd.to_numeric(C.VEK, errors="coerce"), e=C.MANDAT == "A").dropna(subset=["age"])
