@@ -81,7 +81,9 @@ def main():
     list_ages, nlists, stalwarts, seventh = [], [], [], []
     for kod, ballot in b26.groupby("KODZASTUP"):
         people = []
-        for r in ballot.assign(list_no=ballot.id.str.split(":").str[3].astype(int),
+        obvod = ballot.id.str.split(":").str[2].astype(int)
+        multi = obvod.nunique() > 1  # Lišov 2026: list numbers repeat per electoral district -> obvod*100 + list
+        for r in ballot.assign(list_no=ballot.id.str.split(":").str[3].astype(int) + (obvod * 100 if multi else 0),
                                pos=ballot.id.str.split(":").str[4].astype(int)).sort_values(["list_no", "pos"]).itertuples(index=False):
             hrows = sorted(hist[r.person], key=lambda h: h.year)
             ids = {h.id for h in hrows}

@@ -138,7 +138,7 @@ footer { max-width: none; margin: 0 auto; padding: 16px; color: var(--muted); fo
   <h1>__TOWN__</h1>
   <section class="council" id="council"></section>
   <p class="legend" style="margin:12px 0 0"><span class="dots" aria-hidden="true"><i class="won"></i><i></i><i class="none"></i></span>Tečky = volby 2002 až 2026: plná zvolen, prázdná kandidoval, tečkovaná nekandidoval.</p>
-  <div class="hl" role="radiogroup" aria-label="Zvýraznit kandidáty">
+  <div class="hl" role="group" aria-label="Zvýraznit kandidáty">
     <span>Zvýraznit:</span>
     <button type="button" data-hl="" aria-pressed="true">Všichni</button>
     <button type="button" data-hl="new" aria-pressed="false">Poprvé v obci</button>
@@ -201,6 +201,7 @@ const listName = new Map(people.map(p => [nl(p.list), p.list]));
 const key = s => listName.get(nl(s)) || s;  // one display name per list: this year's spelling
 // a list is its people: when most of a 2022 list's returning candidates are together on one 2026 list (or most of that
 // 2026 list's returning candidates came from it), it is the same group renamed ("Pro Manětínsko" -> "Společně pro MANĚTÍNSKO")
+const lists22 = new Set([...people.map(p => prev22(p)?.here?.list).filter(Boolean), ...(meta.leaving || []).map(l => l.list)].map(nl));
 const continued = (() => {
   const pair = new Map(), from = new Map(), into = new Map(), inc = (m, k) => m.set(k, (m.get(k) || 0) + 1);
   for (const p of people) {
@@ -209,9 +210,14 @@ const continued = (() => {
     const a = nl(h.here.list), b = nl(p.list);
     inc(pair, a + "\u0000" + b); inc(from, a); inc(into, b);
   }
-  return new Set([...pair].filter(([k, n]) => { const [a, b] = k.split("\u0000"); return n >= 2 && (n >= from.get(a) / 2 || n >= into.get(b) / 2); }).map(([k]) => k));
+  // a rename only when the 2022 list is gone in 2026 and the 2026 list did not already run in 2022 (else it is a move)
+  return new Set([...pair].filter(([k, n]) => { const [a, b] = k.split("\u0000");
+    return n >= 2 && !listName.has(a) && !lists22.has(b) && (n >= from.get(a) / 2 || n >= into.get(b) / 2); }).map(([k]) => k));
 })();
-const ownName = (p, list) => { const l = " " + nl(list) + " "; return nl(p.name).split(" ").filter(w => w.length >= 4).some(w => l.includes(" " + w + " ")); };
+// one-person list named after the candidate: the surname (last word that is not a title) must be in the list name
+const TITLES = new Set("ing mgr bc mudr judr phdr rndr mvdr paeddr thdr phd csc drsc mba dis ll m ma msc bba dr doc prof et arch akad mal art".split(" "));
+const surname = p => nl(p.name).split(" ").filter(w => !TITLES.has(w)).at(-1) || "";
+const ownName = (p, list) => { const s = surname(p); return s.length >= 2 && (" " + nl(list) + " ").includes(" " + s + " "); };
 // where the candidate stood in 2022 in this council: {kind: new|break|elsewhere|stay|moved, list}
 function move22(p) {
   const h = prev22(p);
@@ -219,11 +225,14 @@ function move22(p) {
   const here = h.here;
   if (!here) return {kind: "elsewhere", town: h.town};
   const now = p.history.at(-1);
+  const own = ownName(p, here.list) && ownName(p, p.list);
+  // the 2022 list still runs in 2026 under its name, and this person is on another one: a move, whatever the parties
+  if (nl(here.list) !== nl(p.list) && listName.has(nl(here.list)) && !own) return {kind: "moved", list: here.list};
   const pa = here.parties || [], pb = now.parties || [];
   const otherParty = pa.length && pb.length && !pa.some(x => pb.includes(x));  // e.g. STAN -> ANO stays a move even if the group went together
   const same = (here.lid || here.list) === (now.lid || p.list) || nl(here.list) === nl(p.list) || pa.some(x => pb.includes(x))  // renamed list of the same party
     || (!otherParty && continued.has(nl(here.list) + "\u0000" + nl(p.list)))
-    || ownName(p, here.list) && ownName(p, p.list);  // one-person list under the candidate's own name, spelled differently
+    || own;  // one-person list under the candidate's own name, spelled differently
   return {kind: same ? "stay" : "moved", list: here.list};
 }
 function moveLine(p) {
@@ -274,7 +283,7 @@ document.getElementById("council").innerHTML = `<span>${pl(full.length + solo.le
   <p>Počítáno ze zvolených ve volbách 2022, změny během období (rezignace, náhradníci) data nezachycují.</p></details>` : ""}`;
 
 document.getElementById("lists").innerHTML = full.map(([no, ps]) => `<section class="list" id="l${no}" data-no="${no}">
-  <header><a class="no" href="#kandidatka-${no}" title="Odkaz na tuto kandidátku">Kandidátka č. ${no}</a><h2>${esc(ps[0].list)}</h2>${listStats(ps, no)}</header>
+  <header><a class="no" href="#kandidatka-${no}" title="Odkaz na tuto kandidátku">Kandidátka č. ${no % 100}${no >= 100 ? `, volební obvod ${Math.floor(no / 100)}` : ""}</a><h2>${esc(ps[0].list)}</h2>${listStats(ps, no)}</header>
   ${ps.map((p, i) => i < SHOW ? row(p) : row(p).replace('class="row"', 'class="row" hidden')).join("")}
   ${ps.length > SHOW ? `<button class="more" type="button">Zobrazit všech ${ps.length}</button>` : ""}</section>`).join("");
 document.getElementById("nk").innerHTML = solo.length ? `<h2>Kandidátky s jediným kandidátem</h2><p class="stats">Nezávislí kandidáti a strany s jedním kandidátem. Číslo kandidátky je u jména.</p>
@@ -313,7 +322,7 @@ function moveTables() {
   const lists = [...new Set(people.map(p => p.list))];
   const rows = lists.map(l => {
     const t = by.get(l), tot = people.filter(p => p.list === l).length;
-    if (!t) return `<li><b>${esc(l)}</b><p>Nikdo z ${tot} kandidátů v obci dříve nekandidoval.</p></li>`;
+    if (!t) return `<li><b>${esc(l)}</b><p>${tot === 1 ? "Kandidát v obci dříve nekandidoval." : `Nikdo z ${tot} kandidátů v obci dříve nekandidoval.`}</p></li>`;
     const moved = Object.entries(t.src).sort((a, b) => b[1] - a[1]);
     const nm = moved.reduce((a, [, n]) => a + n, 0);
     const parts = [];
@@ -331,6 +340,7 @@ function moveTables() {
     <ul class="mvlist">${rows}</ul>`;
 }
 function flowSvg() {
+  if (!people.some(p => move22(p).kind !== "new")) return moveTables();  // everybody is new: nothing to draw
   const links = new Map(), L = new Map(), R = new Map();
   const add = (m, k, n) => m.set(k, (m.get(k) || 0) + n);
   const GROUP = {new: "noví", break: "kandidovali dříve, ne 2022", elsewhere: "v roce 2022 jinde"}, OUT = "zvolení 2022, už nekandidují";
@@ -381,7 +391,7 @@ document.getElementById("movesBtn").addEventListener("click", e => {
 if (new URLSearchParams(location.search).has("presuny")) document.getElementById("movesBtn").click();
 const tabs = document.getElementById("tabs");
 const panes = [...document.querySelectorAll(".list"), ...(solo.length ? [document.getElementById("nk")] : [])];
-tabs.innerHTML = full.map(([no, ps]) => `<button role="tab" data-t="l${no}">${no}. ${esc(ps[0].list.slice(0, 22))}${ps[0].list.length > 22 ? "…" : ""}</button>`).join("")
+tabs.innerHTML = full.map(([no, ps]) => `<button role="tab" data-t="l${no}">${no % 100}. ${esc(ps[0].list.slice(0, 22))}${ps[0].list.length > 22 ? "…" : ""}</button>`).join("")
   + (solo.length ? `<button role="tab" data-t="nk">Jednotliví kandidáti (${solo.length})</button>` : "");
 function selectTab(id) {
   panes.forEach(el => el.classList.toggle("on", el.id === id));
@@ -409,7 +419,7 @@ function votesChart(p) {
   const moves = [...d].reverse().filter(h => h.vrank != null).map(h => {
     const delta = h.pos - h.vrank;
     const mv = delta > 0 ? `voliči ${f(p, "ho", "ji")} posunuli o ${delta} ${delta === 1 ? "místo" : delta < 5 ? "místa" : "míst"} nahoru` : delta < 0 ? `voliči ${f(p, "ho", "ji")} posunuli o ${-delta} ${-delta === 1 ? "místo" : -delta < 5 ? "místa" : "míst"} dolů` : "voliči pořadí potvrdili";
-    return `<li><span>${h.year}</span><span>na kandidátce ${h.pos}., podle hlasů ${h.vrank}. z ${h.vn}: ${mv}; ${Math.round(h.vshare * 1000) / 10} % hlasů kandidátky${h.skip ? `, ${f(p, "zvolen", "zvolena")} díky preferenčním hlasům` : ""}</span></li>`; }).join("");
+    return `<li><span>${h.year}</span><span>na kandidátce ${h.pos}., podle hlasů ${h.vrank}. z ${h.vn}: ${mv}${h.vshare == null ? "" : `; ${Math.round(h.vshare * 1000) / 10} % hlasů kandidátky`}${h.skip ? `, ${f(p, "zvolen", "zvolena")} díky preferenčním hlasům` : ""}</span></li>`; }).join("");
   return `<h3>Hlasy ve volbách</h3><svg viewBox="0 0 ${W} ${H + 18}" role="img" aria-label="Počet hlasů v jednotlivých volbách" style="width:100%;height:auto;overflow:visible;font:12px var(--sans);fill:var(--muted)">${bars}</svg>
     <p class="note">Tmavý sloupec: zvolen. Hlasy nejsou srovnatelné mezi obcemi různé velikosti, důležitější je pořadí na kandidátce.</p>
     <ul class="why">${moves}</ul>`;
@@ -436,7 +446,7 @@ function profile(p) {
     </ul>
     ${votesChart(p)}
     <h3>Časová osa kandidatur</h3>
-    <table><thead><tr><th>Rok</th><th>Kandidátka a obec</th><th>Pořadí</th><th class="opt">Hlasy</th><th>Výsledek</th></tr></thead><tbody>${rows}</tbody></table>
+    <table><thead><tr><th>Rok</th><th>Kandidátka a obec</th><th>Pořadí</th><th class="opt">Hlasy</th><th class="opt">Podle hlasů</th><th>Výsledek</th></tr></thead><tbody>${rows}</tbody></table>
     ${why ? `<h3>Jak jsme kandidatury spojili</h3><ul class="why">${why}</ul>` : ""}
     ${p.family ? `<p class="note">V obci kandidoval i jmenovec jiného věku, spojení proto vyžadovala další shodu.</p>` : ""}
     ${p.maybe.length ? `<div class="maybe"><p><strong>Možná také ${f(p, "on", "ona")}</strong>, spojení není jisté a do počtů se nezapočítává:</p>
@@ -471,7 +481,10 @@ document.addEventListener("click", e => {
   if (e.target.closest(".close")) dlg.close();
 
 });
-dlg.addEventListener("close", () => { if (location.hash && !listHash()) history.replaceState(null, "", location.pathname + location.search); lastRow?.focus(); });
+dlg.addEventListener("close", () => {
+  if (history.state?.p) history.back();  // opened with pushState: undo it
+  else if (location.hash && !listHash()) history.replaceState(null, "", location.pathname + location.search);
+  lastRow?.focus(); });
 dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
 </script>
 </body>
