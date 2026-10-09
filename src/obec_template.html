@@ -51,13 +51,17 @@ h1 { font: 600 clamp(2rem, 5vw, 3rem)/1.1 var(--serif); margin: 4px 0 4px; }
 #flow h3 { font: 600 1rem var(--sans); margin: 0 0 4px; }
 #flow svg text { font: 13px var(--sans); fill: var(--ink); }
 #flow h3 { margin-top: 20px; }
-.ftw { overflow-x: auto; }
-.ft { border-collapse: collapse; font-size: .9rem; width: 100%; max-width: 1100px; }
-.ft th, .ft td { text-align: left; vertical-align: top; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule); }
-.ft thead th { font-weight: 600; color: var(--muted); font-size: .8rem; }
-.ft tbody th { font-weight: 500; min-width: 180px; }
-.ft td.n { font-variant-numeric: tabular-nums; min-width: 70px; }
-.ft .src { color: var(--muted); font-size: .8rem; min-width: 200px; margin-top: 2px; }
+.mvlist { list-style: none; padding: 0; margin: 0; max-width: 820px; }
+.mvlist li { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.mvlist .muted { color: var(--muted); font-size: .85rem; }
+.mvlist p { margin: 4px 0 0; font-size: .92rem; }
+.mbar { display: flex; height: 8px; gap: 2px; margin-top: 6px; max-width: 420px; }
+.mbar span, .mleg span { border-radius: 2px; }
+.mleg span { display: inline-block; width: 10px; height: 10px; margin: 0 4px 0 10px; vertical-align: -1px; }
+.mleg span:first-child { margin-left: 0; }
+:is(.mbar, .mleg) .s { background: var(--ink); } :is(.mbar, .mleg) .m { background: var(--accent); }
+:is(.mbar, .mleg) .e { background: var(--muted); opacity: .6; } :is(.mbar, .mleg) .b { background: var(--muted); opacity: .35; }
+:is(.mbar, .mleg) .n { background: var(--rule); }
 .mv { display: none; font-size: .8rem; margin-top: 2px; }
 body.moves .mv { display: block; }
 .mv.moved { font-weight: 600; }
@@ -122,17 +126,6 @@ footer { max-width: none; margin: 0 auto; padding: 16px; color: var(--muted); fo
   .top nav { gap: 12px !important; }
   .flowsvg { overflow-x: auto; }
   .flowsvg svg { min-width: 720px; }
-  /* move tables as cards: list name on its own line, counts labelled below */
-  .ft thead { display: none; }
-  .ft, .ft tbody, .ft tr { display: block; }
-  .ft tr { padding: 8px 0; border-bottom: 1px solid var(--rule); }
-  .ft th, .ft td { border: 0; padding: 0; }
-  .ft tbody th { display: block; min-width: 0; margin-bottom: 4px; }
-  .ft td.n { display: inline-block; min-width: 0; margin-right: 14px; vertical-align: top; text-align: left; }
-  .flowsvg::after { content: "Diagram posuňte do strany."; display: block; color: var(--muted); font-size: .8rem; position: sticky; left: 0; }
-  .ft td.n::before { content: attr(data-l) " "; color: var(--muted); font-size: .8rem; }
-  .ft td.n:has(.src) { display: block; }
-  .ft .src { min-width: 0; }
 }
 </style>
 </head>
@@ -201,6 +194,10 @@ function histLine(p) {
 }
 
 function prev22(p) { return p.history.find(h => h.year === "2022"); }
+// list names differ only in quotes or case between years („Ženy pro Hnojice“ / „Ženy pro Hnojice”)
+const nl = s => (s || "").replace(/[„“”"‚‘’'«»]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+const listName = new Map(people.map(p => [nl(p.list), p.list]));
+const key = s => listName.get(nl(s)) || s;  // one display name per list: this year's spelling
 // where the candidate stood in 2022 in this council: {kind: new|break|elsewhere|stay|moved, list}
 function move22(p) {
   const h = prev22(p);
@@ -208,7 +205,7 @@ function move22(p) {
   const here = h.here;
   if (!here) return {kind: "elsewhere", town: h.town};
   const now = p.history.at(-1);
-  const same = (here.lid || here.list) === (now.lid || p.list) || (here.parties || []).some(x => (now.parties || []).includes(x));  // renamed list of the same party
+  const same = (here.lid || here.list) === (now.lid || p.list) || nl(here.list) === nl(p.list) || (here.parties || []).some(x => (now.parties || []).includes(x));  // renamed list of the same party
   return {kind: same ? "stay" : "moved", list: here.list};
 }
 function moveLine(p) {
@@ -283,36 +280,43 @@ document.querySelector(".hl").addEventListener("click", e => {
   });
   document.getElementById("hlcount").textContent = k ? `${n} z ${people.length}` : "";
 });
-// numbers behind the diagram, unfolded: where each 2026 list's people stood in 2022, and where each 2022 list's people went
+// the same numbers in words, one line per 2026 list (newcomers left out, see the note)
 function moveTables() {
-  const inc = (o, k, n = 1) => (o[k] = (o[k] || 0) + n, o);
-  const to = new Map(), from = new Map();
+  const by = new Map();
   for (const p of people) {
     const m = move22(p);
-    if (m.kind === "new") continue;  // newcomers are not moves
-    const t = to.get(p.list) || {stay: 0, moved: 0, src: {}, elsewhere: 0, break: 0};
-    m.kind === "moved" ? (t.moved++, inc(t.src, m.list)) : t[m.kind]++;
-    to.set(p.list, t);
-    if (m.list) { const f = from.get(m.list) || {stay: 0, moved: 0, dst: {}, out: 0}; m.kind === "stay" ? f.stay++ : (f.moved++, inc(f.dst, p.list)); from.set(m.list, f); }
+    if (m.kind === "new") continue;
+    const t = by.get(p.list) || {stay: 0, src: {}, elsewhere: 0, break: 0, n: 0};
+    t.n++;
+    if (m.kind === "moved") t.src[key(m.list)] = (t.src[key(m.list)] || 0) + 1; else t[m.kind]++;
+    by.set(p.list, t);
   }
-  for (const l of meta.leaving || []) { const f = from.get(l.list) || {stay: 0, moved: 0, dst: {}, out: 0}; f.out++; from.set(l.list, f); }
-  const det = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${esc(k)} ${n}`).join(", ");
-  const c = (n, d, l) => `<td class="n" data-l="${l}">${n || "–"}${n && d ? `<div class="src">${d}</div>` : ""}</td>`;
-  const a = [...to].map(([k, t]) => `<tr><th>${esc(k)}</th>${c(t.stay, "", "zůstali")}${c(t.moved, det(t.src), "přešli z jiné")}${c(t.elsewhere, "", "2022 jinde")}${c(t.break, "", "dříve, ne 2022")}</tr>`).join("");
-  const b = [...from].sort((x, y) => (y[1].stay + y[1].moved) - (x[1].stay + x[1].moved))
-    .map(([k, f]) => `<tr><th>${esc(k)}</th>${c(f.stay, "", "zůstali")}${c(f.moved, det(f.dst), "přešli jinam")}${c(f.out, "", "zvolení, už nekandidují")}</tr>`).join("");
-  return `<h3>Odkud přišli kandidáti 2026</h3>
-    <div class="ftw"><table class="ft"><thead><tr><th>kandidátka 2026</th><th>zůstali</th><th>přešli z jiné</th><th>2022 jinde</th><th>dříve, ne 2022</th></tr></thead><tbody>${a}</tbody></table></div>
-    <h3>Kam šli kandidáti z roku 2022</h3>
-    <div class="ftw"><table class="ft"><thead><tr><th>kandidátka 2022</th><th>zůstali</th><th>přešli jinam</th><th>zvolení, už nekandidují</th></tr></thead><tbody>${b}</tbody></table></div>
-    <p class="stats">Počítáme jen lidi, kteří kandidují v roce 2026, a zvolené z roku 2022. O nezvolených kandidátech 2022, kteří už nekandidují, údaj neuvádíme.</p>`;
+  const lists = [...new Set(people.map(p => p.list))];
+  const rows = lists.map(l => {
+    const t = by.get(l), tot = people.filter(p => p.list === l).length;
+    if (!t) return `<li><b>${esc(l)}</b><p>Nikdo z ${tot} kandidátů v obci dříve nekandidoval.</p></li>`;
+    const moved = Object.entries(t.src).sort((a, b) => b[1] - a[1]);
+    const nm = moved.reduce((a, [, n]) => a + n, 0);
+    const parts = [];
+    if (t.stay) parts.push(`${pl(t.stay, "zůstal", "zůstali", "zůstalo")} ze stejné kandidátky`);
+    for (const [k, n] of moved) parts.push(`${pl(n, "přešel", "přešli", "přešlo")} z kandidátky ${esc(k)}`);
+    if (t.elsewhere) parts.push(`${t.elsewhere} v roce 2022 ${t.elsewhere === 1 ? "kandidoval" : "kandidovali"} jinde (v jiné obci nebo městské části)`);
+    if (t.break) parts.push(`${t.break} ${t.break === 1 ? "kandidoval" : "kandidovali"} dříve, ale ne v roce 2022`);
+    const seg = (n, cls) => n ? `<span class="${cls}" style="flex:${n}"></span>` : "";
+    return `<li><b>${esc(l)}</b> <span class="muted">${t.n} z ${tot} kandidovalo už dříve</span>
+      <div class="mbar">${seg(t.stay, "s")}${seg(nm, "m")}${seg(t.elsewhere, "e")}${seg(t.break, "b")}${seg(tot - t.n, "n")}</div>
+      <p>${parts.join(", ")}.</p></li>`;
+  }).join("");
+  return `<h3>Odkud přišli kandidáti jednotlivých kandidátek</h3>
+    <p class="stats mleg"><span class="s"></span>ze stejné kandidátky <span class="m"></span>z jiné kandidátky <span class="e"></span>v roce 2022 jinde <span class="b"></span>kandidovali dříve, ne 2022 <span class="n"></span>poprvé</p>
+    <ul class="mvlist">${rows}</ul>`;
 }
 function flowSvg() {
   const links = new Map(), L = new Map(), R = new Map();
   const add = (m, k, n) => m.set(k, (m.get(k) || 0) + n);
   const GROUP = {new: "noví", break: "kandidovali dříve, ne 2022", elsewhere: "v roce 2022 jinde"}, OUT = "zvolení 2022, už nekandidují";
-  const flows = people.map(p => [move22(p), p.list]).filter(([m]) => m.kind !== "new").map(([m, l]) => [m.list || GROUP[m.kind], l, m.kind === "moved"])
-    .concat((meta.leaving || []).map(l => [l.list, OUT, false]));
+  const flows = people.map(p => [move22(p), p.list]).filter(([m]) => m.kind !== "new").map(([m, l]) => [m.list ? key(m.list) : GROUP[m.kind], l, m.kind === "moved"])
+    .concat((meta.leaving || []).map(l => [key(l.list), OUT, false]));
   // ponytail: big cities have 20+ lists a side; fold the smallest into "ostatní" so labels stay readable
   const MAXN = 12, OTHER = "ostatní kandidátky", fold = side => {
     const n = new Map(); flows.forEach(f => n.set(f[side], (n.get(f[side]) || 0) + 1));
