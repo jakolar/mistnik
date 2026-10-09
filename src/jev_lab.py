@@ -156,6 +156,10 @@ def main(n):
         out.append([col, round(auc(p_h, ng), 3), round(auc(p_h, nf), 3), f"{(p_h > thr_f).mean():.0%}", round(auc(p_e, ng), 3), round(p_h.median(), 2), round(ng.median(), 2),
                     f"{(p_h > thr).mean():.0%}", round(thr, 2), f"{(p_h >= .9).mean():.0%}", f"{(ng >= .9).mean():.0%}"])
     print(pd.DataFrame(out, columns=["signal", "AUC hard", "AUC hard vs far", "TPR@1% far", "AUC easy", "med pos_hard", "med neg", "TPR hard @FPR1%", "thr", "pos_hard>=.9", "neg>=.9"]).to_string(index=False))
+    # threshold sweep: share of hard positives accepted vs share of father/son namesakes accepted
+    for col in ("json", "m_career", "r2_not_generation", "choice_same"):
+        ph, ng = res["pos_hard"][col].dropna(), res["neg"][col].dropna()
+        print(col, " ".join(f"{t}:{(ph >= t).mean():.0%}/{(ng >= t).mean():.0%}" for t in (0.5, 0.6, 0.7, 0.8, 0.9)))
     # code-side combination of the multi answers (pattern F): logistic regression, 2-fold
     from itertools import chain
     X = pd.concat([res["pos_hard"].assign(y=1), res["neg"].assign(y=0)]).dropna()
@@ -174,3 +178,47 @@ def main(n):
 
 if __name__ == "__main__":
     main(int(sys.argv[1]) if len(sys.argv) > 1 else 150)
+
+
+def round4(n=150):
+    """Realistic negatives: in production every uncertain pair has compatible ages, so the risk is not father/son but two
+    different people with the same name AND birth year. Guaranteed different: same election, same district, same name,
+    birth windows overlapping, two candidacies (one person runs in one council per election, city+part aside -> excluded).
+    Years are hidden for every group, so the shared election year gives nothing away."""
+    allc = P3.load_all()
+    nat, nat_m, loc = P3.stats(allc)
+    s = allc[allc.TYPZASTUP == "1"][["id", "city", "key", "year", "blo", "bhi", "OKRES", "KODZASTUP", "NADRZASTUP"]]  # parts lack NADRZASTUP in some years
+    s = s[s.key.duplicated(keep=False)]
+    m = s.merge(s, on=["key", "year", "OKRES"], suffixes=("_a", "_b"))
+    m = m[(m.id_a < m.id_b) & (m.city_a != m.city_b) & (m.blo_a <= m.bhi_b) & (m.blo_b <= m.bhi_a)]
+    # a city and its parts are one place: the same person may run in both (first try leaked those as "negatives")
+    top = lambda kod, nadr: nadr.where(nadr != "", kod)
+    m = m[(top(m.KODZASTUP_a, m.NADRZASTUP_a) != top(m.KODZASTUP_b, m.NADRZASTUP_b))
+          & (m.KODZASTUP_a != m.NADRZASTUP_b) & (m.KODZASTUP_b != m.NADRZASTUP_a)]
+    neg = m.sample(min(n, len(m)), random_state=6)[["id_a", "id_b"]].values.tolist()
+    # hardest realistic case: same council, same election, same name, compatible age -> two different people (big cities)
+    t = s.merge(s, on=["key", "year", "KODZASTUP"], suffixes=("_a", "_b"))
+    t = t[(t.id_a < t.id_b) & (t.blo_a <= t.bhi_b) & (t.blo_b <= t.bhi_a)]
+    neg_town = t.sample(min(n, len(t)), random_state=7)[["id_a", "id_b"]].values.tolist()
+    print("same-town same-age namesake pairs available:", len(t))
+    pos = pd.read_csv(DER / "lab_pos_hard.csv").sample(frac=1, random_state=1).head(n)[["id_a", "id_b"]].values.tolist()
+    def st(a, b):
+        x = state(a, b, nat, loc)
+        for k in ("candidacy_A", "candidacy_B"): x[k].pop("election_year")
+        x.pop("years_apart")
+        return x
+    Q = {"same": {**Q_SAME, "instructions": Q_SAME["instructions"].replace("running in two municipal elections", "running in municipal elections")},
+         "career": {**MULTI["career"], "instructions": "Could the `occupation` of `candidacy_A` and the `occupation` of `candidacy_B` belong to one person's working life "
+                    "(same job, same field, promotion, retirement, student who started working)?"},
+         "who": Q_CHOICE}
+    out = {}
+    for g, pairs in (("pos_hard", pos), ("neg_same_age", neg), ("neg_same_town", neg_town)):
+        with cf.ThreadPoolExecutor(8) as ex:
+            r = list(ex.map(lambda ab: ask_raw("lab_r4@v3", st(allc.loc[ab[0]], allc.loc[ab[1]]), Q), pairs))
+        out[g] = pd.DataFrame({"same": [x and x["same"] for x in r], "career": [x and x["career"] for x in r],
+                               "choice_same": [x and x["who"].get("same") for x in r]})
+    print("negatives available:", len(m))
+    for col in ("same", "career", "choice_same"):
+        for neg_g in ("neg_same_age", "neg_same_town"):
+            ph, ng = out["pos_hard"][col].dropna(), out[neg_g][col].dropna()
+            print(neg_g, col, "AUC", round(auc(ph, ng), 3), " ".join(f"{t}:{(ph >= t).mean():.0%}/{(ng >= t).mean():.0%}" for t in (0.5, 0.6, 0.7, 0.8, 0.9)))
