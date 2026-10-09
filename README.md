@@ -53,7 +53,7 @@ Dotazy na jazykové modely (Jev, Gemini) jdou přes OpenRouter a potřebují `OP
 
 Podkladem jsou otevřená data Českého statistického úřadu (kandidátní listiny 2002–2026), licencovaná [CC BY 4.0](https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu). Vše, co Místník ukazuje nad rámec kandidátních listin (spojení osob, přesuny, statistiky), jsou **odvozené údaje**, ne oficiální statistika ČSÚ. Četnosti jmen MV ČR se používají jen uvnitř výpočtu a nezveřejňují se.
 
-Na webu jsou osobní údaje kandidátů ze zveřejněných kandidátních listin. Chyba ve spojení nebo námitka: **opravy@mistnik.cz**.
+Na webu jsou osobní údaje kandidátů ze zveřejněných kandidátních listin. Chyba ve spojení nebo námitka: **jan@klr.cz**.
 
 ## Licence
 

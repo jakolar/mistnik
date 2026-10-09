@@ -13,7 +13,7 @@ UNCERTAIN = ["manual_review", "manual_review_namesake", "possible_match"]
 COLS = ["id_a", "id_b", "decision", "p", "geo", "cocand", "party", "titles", "occ", "list_party", "same_list", "same_res", "second", "jev_pair"]
 
 
-def main(contact="opravy@mistnik.cz"):
+def main(contact="jan@klr.cz"):
     out = SITE / "data"
     out.mkdir(parents=True, exist_ok=True)
     C = pd.read_csv(DER / "cluster_persons.csv.gz", dtype=str, keep_default_na=False, usecols=["id", "person"])

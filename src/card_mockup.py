@@ -208,7 +208,7 @@ def main(kod="mesto"):
         leaving += [] if e.person in running else [{
             "name": f"{e.TITULPRED} {e.JMENO} {e.PRIJMENI}".strip(), "list": e.NAZEVCELK,
             "elsewhere": council_name.get(now.KODZASTUP.iat[0]) if len(now) else None}]
-    meta = {"elected22": len(elected22), "running": int(sum(p["incumbent"] for p in people)), "leaving": leaving, "contact": "opravy@mistnik.cz",
+    meta = {"elected22": len(elected22), "running": int(sum(p["incumbent"] for p in people)), "leaving": leaving, "contact": "jan@klr.cz",
             "ages": {str(no): age_stats[(kod, no)] for (k, no) in age_stats if k == kod}}
     OUT.mkdir(parents=True, exist_ok=True)
     page = (ROOT / "src/obec_template.html").read_text()

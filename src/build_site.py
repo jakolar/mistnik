@@ -14,8 +14,8 @@ import bisect
 
 ROOT = L.ROOT
 SITE = ROOT / "site"
-CONTACT = "opravy@mistnik.cz"  # placeholder until Jan names the address
-CONTROLLER = "Jan Antonín Kolář, kontakt opravy@mistnik.cz"  # Jan 2026-10-09: controller is Jan personally, not the company
+CONTACT = "jan@klr.cz"
+CONTROLLER = "Jan Antonín Kolář, kontakt jan@klr.cz"  # Jan 2026-10-09: controller is Jan personally, not the company
 
 
 def js(obj):
@@ -140,7 +140,8 @@ def main():
         index.append([kod, town, okres, len(people), sum(p["ran"] > 0 for p in people)])
         stats["cands"] += len(people)
         stats["lists"] += len({p["list_no"] for p in people})
-        nlists.append([len({p["list_no"] for p in people}), town, kod])
+        sizes = collections.Counter(p["list_no"] for p in people)
+        nlists.append([sum(n >= 2 for n in sizes.values()), town, kod])  # one-person lists are independents, not lists
         stats["women"] += sum(p["gender"] == "Z" for p in people)
         stats["men"] += sum(p["gender"] == "M" for p in people)
         stats["new"] += sum(p["ran"] == 0 and not p["namesake"] for p in people)
@@ -166,8 +167,8 @@ def main():
     for k, rows in shards.items():
         (SITE / "hledat" / f"{k.replace(' ', '_')}.json").write_text(js(rows))
     list_ages.sort()
-    stats["young"], stats["old"] = list_ages[:5], list_ages[-5:][::-1]
-    stats["most_lists"] = sorted(nlists, reverse=True)[:5]
+    stats["young"], stats["old"] = list_ages[:50], list_ages[-50:][::-1]
+    stats["most_lists"] = sorted(nlists, reverse=True)[:50]
     stats["councils"] = len(index)
     big = ["554782", "582786", "554821", "554791", "563889", "500496", "544256", "569810", "554804", "555134"]  # ten largest cities
     stats["occ"] = json.load(open(ROOT / "data/derived/occ_groups.json", encoding="utf-8"))["rank"]

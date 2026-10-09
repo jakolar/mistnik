@@ -46,6 +46,8 @@ section.block { margin-top: 64px; padding-top: 20px; border-top: 2px solid var(-
 .rows li a { color: var(--ink); text-decoration: none; }
 .rows li a:hover { text-decoration: underline; }
 .rows li span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.showmore { margin-top: 8px; font: inherit; font-size: .9rem; background: none; border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; color: var(--ink); cursor: pointer; }
+.showmore:hover { background: var(--hover); }
 .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
 .how p { margin: 4px 0 0; color: var(--muted); }
 .how strong { font: 600 1.05rem var(--serif); }
@@ -94,7 +96,7 @@ footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px)
     </div>
   </section>
 </main>
-<footer>Zdroj: Český statistický úřad, kandidátní listiny 2002–2026, <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">licence CC BY 4.0</a>. Historie a statistiky jsou odvozené údaje, ne oficiální statistika ČSÚ; historie vzniká naším párováním a může obsahovat chyby, <a href="metodika.html">jak to počítáme</a>, <a href="data.html">otevřená data</a>, <a href="https://github.com/jakolar/mistnik">zdrojový kód</a>. Chyba nebo námitka: <a href="mailto:opravy@mistnik.cz">opravy@mistnik.cz</a>. Místník připravil Jan Antonín Kolář.</footer>
+<footer>Zdroj: Český statistický úřad, kandidátní listiny 2002–2026, <a href="https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu">licence CC BY 4.0</a>. Historie a statistiky jsou odvozené údaje, ne oficiální statistika ČSÚ; historie vzniká naším párováním a může obsahovat chyby, <a href="metodika.html">jak to počítáme</a>, <a href="data.html">otevřená data</a>, <a href="https://github.com/jakolar/mistnik">zdrojový kód</a>. Chyba nebo námitka: <a href="mailto:jan@klr.cz">jan@klr.cz</a>. Místník připravil Jan Antonín Kolář.</footer>
 <script>
 const idx = __INDEX__;  // [kod, nazev, okres, kandidatu, s_historii]
 const S = __STATS__;
@@ -109,12 +111,17 @@ document.getElementById("nums").innerHTML = [
   [pct(S.women, S.women + S.men), "žen mezi kandidáty"], [pct(S.again, S.cands), "kandidovalo už dříve"],
   [pct(S.inc, S.e22), "zvolených v roce 2022 kandiduje znovu"], [num(S.long), "kandiduje od roku 2010 nebo dřív"],
 ].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
+// first 5 rows visible, the rest (up to 50) behind a button
+const more = rows => `<ul class="rows">${rows.map((r, i) => i < 5 ? r : r.replace("<li>", "<li hidden>")).join("")}</ul>`
+  + (rows.length > 5 ? `<button class="showmore" type="button">Zobrazit dalších ${rows.length - 5}</button>` : "");
 const row = r => `<li><a href="obec/${r[4]}.html">${esc(r[2])}, ${esc(r[3])}</a><span>medián ${String(r[0]).replace(".", ",")} let</span></li>`;
 document.getElementById("facts").innerHTML = `
-  <div><h3>Nejmladší kandidátky</h3><ul class="rows">${S.young.map(row).join("")}</ul></div>
-  <div><h3>Nejstarší kandidátky</h3><ul class="rows">${S.old.map(row).join("")}</ul></div>
-  <div><h3>Nejvíc kandidátek</h3><ul class="rows">${S.most_lists.map(r => `<li><a href="obec/${r[2]}.html">${esc(r[1])}</a><span>${r[0]} kandidátek</span></li>`).join("")}</ul></div>
-  <p class="note" style="grid-column:1/-1">Věk: kandidátky s aspoň 10 kandidáty.</p>`;
+  <div><h3>Nejmladší kandidátky</h3>${more(S.young.map(row))}</div>
+  <div><h3>Nejstarší kandidátky</h3>${more(S.old.map(row))}</div>
+  <div><h3>Nejvíc kandidátek</h3>${more(S.most_lists.map(r => `<li><a href="obec/${r[2]}.html">${esc(r[1])}</a><span>${r[0]} kandidátek</span></li>`))}</div>
+  <p class="note" style="grid-column:1/-1">Věk: kandidátky s aspoň 10 kandidáty. Počet kandidátek: jen kandidátky s aspoň dvěma kandidáty, bez samostatně kandidujících jednotlivců.</p>`;
+document.querySelectorAll(".showmore").forEach(b => b.addEventListener("click", () => {
+  b.previousElementSibling.querySelectorAll("li[hidden]").forEach(li => li.hidden = false); b.remove(); }));
 
 const O = S.occ, slug = c => "s-" + c.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
 const orow = r => `<li><a href="povolani.html#${slug(r[3])}">${esc(r[0])}</a><span>${Math.round(r[2] * 100)} % zvoleno z ${num(r[1])}</span></li>`;

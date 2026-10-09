@@ -61,6 +61,7 @@ table.tx td.zv { min-width: 9.5rem; }
 .bar b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--stamp); }
 footer { margin-top: 56px; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--rule); padding-top: 12px; }
 @media (max-width: 560px) { h1 { font-size: 1.9rem; } .two { grid-template-columns: 1fr; } }
+.showmore { margin-top: 8px; font: inherit; font-size: .9rem; background: none; border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; color: var(--ink); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -121,9 +122,10 @@ function card(c) {
     <div class="two">
       <div><h3>Jak to kandidáti píšou</h3>
         <table class="tx"><thead><tr><th>Zápis povolání</th><th class="r">Kandidatur</th><th class="r">Zvoleno</th></tr></thead><tbody>
-        ${c.texts.map(([t, n, r]) => `<tr><td>${esc(t || "(neuvedeno)")}</td><td class="r">${num(n)}</td>
+        ${c.texts.map(([t, n, r], i) => `<tr${i >= 8 ? " hidden" : ""}><td>${esc(t || "(neuvedeno)")}</td><td class="r">${num(n)}</td>
           <td class="r zv">${r == null ? "–" : `<span class="bar" aria-hidden="true"><i style="width:${Math.min(100, r * 100)}%"></i><b style="left:${c.base * 100}%"></b></span>${pct(r)}`}</td></tr>`).join("")}
         </tbody></table>
+        ${c.texts.length > 8 ? `<button class="showmore" type="button">Zobrazit dalších ${c.texts.length - 8}</button>` : ""}
         <p class="note">Zvoleno: kolik procent kandidatur v letech 2002–2022 skončilo zvolením. Svislá čárka je průměr všech kandidátů (${pct(c.base)}).</p></div>
       <div><h3>Věk</h3><ul class="rows">${["do 30", "30–44", "45–59", "60 a více"].map((l, k) => `<li><span>${l} let</span><span>${pct(c.ages[k] / c.n)}</span></li>`).join("")}</ul>
         <h3>Velikost obce</h3><ul class="rows">${c.sizes.map(([l, s]) => `<li><span>${l} obyvatel</span><span>${pct(s)}</span></li>`).join("")}</ul>
@@ -153,6 +155,10 @@ document.querySelectorAll(".chart").forEach(ch => {
   });
 });
 const q = document.getElementById("q");
+document.addEventListener("click", e => {
+  const b = e.target.closest(".showmore"); if (!b) return;
+  b.previousElementSibling.querySelectorAll("tr[hidden]").forEach(r => r.hidden = false); b.remove();
+});
 q.addEventListener("input", () => {
   const v = q.value.trim().toLowerCase();
   document.querySelectorAll("[data-search]").forEach(el => el.hidden = v && !el.dataset.search.includes(v));
