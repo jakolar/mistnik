@@ -81,7 +81,7 @@ footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px)
     <h2>Volby 2026 v číslech</h2>
     <div class="nums" id="nums"></div>
     <p class="note">Čísla o dřívějších kandidaturách jsou spíš dolní odhad. Kandidatury spojujeme jen tam, kde jsme si jistí: zhruba u 4 % kandidátů (asi 7 500 lidí) existuje možné spojení s dřívější kandidaturou, které jsme nepotvrdili a nezobrazujeme. Nespojíme ani kandidáty, kteří změnili příjmení, typicky po sňatku. <a href="metodika.html">Jak to počítáme</a></p>
-    <h3 class="sub3">Věk kandidátů</h3>
+    <h3 class="sub3">Věk kandidátů 2002 až 2026</h3>
     <div id="ages" class="ages"></div>
     <h3 class="sub3">Podíl žen</h3>
     <div id="women" class="ages"></div>
@@ -126,27 +126,36 @@ document.getElementById("nums").innerHTML = [
   [pct(S.women, S.women + S.men), "žen mezi kandidáty"], [pct(S.again, S.cands), "kandidovalo už dříve"],
   [pct(S.inc, S.e22), "zvolených v roce 2022 kandiduje znovu"], [num(S.long), "kandiduje od roku 2010 nebo dřív"],
 ].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
-// age distribution of all 2026 candidates: one series, so no legend; hover shows the exact count
+// age distribution per election as share of that year's candidates: 2026 highlighted, earlier years in grey
 (() => {
-  const A = S.age_hist, n = A.n, max = Math.max(...n), W = 1000, H = 220, pl = 8, pb = 26, pt = 26;
-  const x = i => pl + i * (W - 2 * pl) / (n.length - 1), y = v => pt + (H - pt - pb) * (1 - v / max);
-  const line = n.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
-  const ticks = [20, 30, 40, 50, 60, 70, 80, 90].map(a => `<text x="${x(a - A.from)}" y="${H - 6}" text-anchor="middle">${a === 90 ? "90+" : a}</text>`).join("");
-  const mx = x(A.mean - A.from);
-  document.getElementById("ages").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Rozložení věku kandidátů 2026, průměr ${String(A.mean).replace(".", ",")} let">
+  const Y = S.age_years, last = Y.at(-1), n = last.share.length, from = 18, W = 1000, H = 240, pl = 8, pb = 26, pt = 30;
+  const max = Math.max(...Y.flatMap(d => d.share));
+  const x = i => pl + i * (W - 2 * pl) / (n - 1), y = v => pt + (H - pt - pb) * (1 - v / max);
+  const path = d => d.share.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+  const c = v => Number(v).toFixed(1).replace(".", ",");
+  const old = Y.slice(0, -1).map((d, k) => `<path d="${path(d)}" fill="none" stroke="var(--muted)" stroke-opacity="${(.2 + .45 * k / (Y.length - 2)).toFixed(2)}" stroke-width="1.5"/>`).join("");
+  const ticks = [20, 30, 40, 50, 60, 70, 80, 90].map(a => `<text x="${x(a - from)}" y="${H - 6}" text-anchor="middle">${a === 90 ? "90+" : a}</text>`).join("");
+  const mx = x(last.mean - from), m0 = x(Y[0].mean - from);
+  document.getElementById("ages").innerHTML = `<p class="note leg"><span style="background:var(--accent)"></span>2026 <span style="background:var(--muted);opacity:.5"></span>volby 2002 až 2022 (čím tmavší, tím novější)</p>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Rozložení věku kandidátů 2002 až 2026; průměr vzrostl z ${c(Y[0].mean)} na ${c(last.mean)} let">
     <line x1="${pl}" x2="${W - pl}" y1="${H - pb}" y2="${H - pb}" stroke="var(--rule)"/>
-    <path d="${line}L${x(n.length - 1)},${H - pb}L${x(0)},${H - pb}Z" fill="var(--accent)" fill-opacity=".14"/>
-    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"/>
-    <line x1="${mx}" x2="${mx}" y1="${pt - 8}" y2="${H - pb}" stroke="var(--ink)" stroke-dasharray="3 3"/>
-    <text x="${mx + 6}" y="${pt - 10}" style="fill:var(--ink)">průměr ${String(A.mean).replace(".", ",")} let</text>
-    ${ticks}<line id="agecur" y1="${pt}" y2="${H - pb}" stroke="var(--ink)" stroke-opacity=".35" style="display:none"/>
-    <rect x="0" y="0" width="${W}" height="${H}" fill="transparent" id="agehit"/></svg><div class="tip" id="agetip" hidden></div>`;
-  const svg = document.querySelector("#ages svg"), tip = document.getElementById("agetip"), cur = document.getElementById("agecur");
+    <path d="${path(last)}L${x(n - 1)},${H - pb}L${x(0)},${H - pb}Z" fill="var(--accent)" fill-opacity=".12"/>${old}
+    <path d="${path(last)}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <line x1="${m0}" x2="${m0}" y1="${pt}" y2="${H - pb}" stroke="var(--muted)" stroke-dasharray="3 3"/>
+    <line x1="${mx}" x2="${mx}" y1="${pt - 14}" y2="${H - pb}" stroke="var(--ink)" stroke-dasharray="3 3"/>
+    <text x="${mx + 6}" y="${pt - 16}" style="fill:var(--ink)">průměr 2026: ${c(last.mean)} let</text>
+    <text x="${m0 - 6}" y="${pt - 2}" text-anchor="end">2002: ${c(Y[0].mean)} let</text>
+    ${ticks}<line class="cur" y1="${pt}" y2="${H - pb}" stroke="var(--ink)" stroke-opacity=".35" style="display:none"/></svg><div class="tip" hidden></div>
+    <p class="note">Podíl kandidátů daného věku v jednotlivých volbách. Průměrný věk kandidátů: ${Y.map(d => `${d.y} ${c(d.mean)}`).join(", ")} let.</p>`;
+  const box = document.getElementById("ages"), svg = box.querySelector("svg"), tip = box.querySelector(".tip"), cur = svg.querySelector(".cur");
   svg.addEventListener("pointermove", e => {
-    const r = svg.getBoundingClientRect(), i = Math.max(0, Math.min(n.length - 1, Math.round(((e.clientX - r.left) / r.width * W - pl) / (W - 2 * pl) * (n.length - 1))));
+    const r = svg.getBoundingClientRect(), i = Math.max(0, Math.min(n - 1, Math.round(((e.clientX - r.left) / r.width * W - pl) / (W - 2 * pl) * (n - 1))));
     cur.setAttribute("x1", x(i)); cur.setAttribute("x2", x(i)); cur.style.display = "";
-    tip.hidden = false; tip.textContent = `${A.from + i}${A.from + i === 90 ? " a více" : ""} let: ${num(n[i])} kandidátů`;
-    tip.style.left = Math.min(r.width - 160, Math.max(0, x(i) / W * r.width - 60)) + "px";
+    const pc = v => c(Math.round(v * 1000) / 10) + " %";
+    tip.hidden = false;
+    tip.innerHTML = `<b>${from + i}${from + i === 90 ? " a více" : ""} let</b><br>` + [...Y].reverse().map(d => `${d.y}: ${pc(d.share[i])}`).join("<br>");
+    tip.style.top = (svg.offsetTop + 10) + "px";
+    tip.style.left = (x(i) / W * r.width > r.width / 2 ? x(i) / W * r.width - 140 : x(i) / W * r.width + 12) + "px";
   });
   svg.addEventListener("pointerleave", () => { tip.hidden = true; cur.style.display = "none"; });
 })();

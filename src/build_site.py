@@ -182,6 +182,11 @@ def main():
     stats["women_years"] = [[int(y), round(float((g.g == "Z").mean()), 4),
                              round(float((g[g.MANDAT == "A"].g == "Z").mean()), 4) if (g.MANDAT == "A").any() else None]
                             for y, g in gw.groupby("year")]
+    # age distribution per election (share of that year's candidates at each age, 90 = 90+), for the home curve
+    ay = C.assign(age=pd.to_numeric(C.VEK, errors="coerce").clip(upper=90)).dropna(subset=["age"])
+    stats["age_years"] = [{"y": int(y), "mean": round(float(g.age.mean()), 1),
+                           "share": [round(float(x), 5) for x in g.age.astype(int).value_counts(normalize=True).reindex(range(18, 91), fill_value=0)]}
+                          for y, g in ay.groupby("year")]
     stats["occ"] = json.load(open(ROOT / "data/derived/occ_groups.json", encoding="utf-8"))["rank"]
     stats["big"] = [[k, council_name.get(k, k)] for k in big if (SITE / "obec" / f"{k}.html").exists()]
     home = (ROOT / "src/home_template.html").read_text().replace("__INDEX__", js(index)).replace("__STATS__", js(stats))
