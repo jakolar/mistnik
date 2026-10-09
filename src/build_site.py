@@ -241,6 +241,32 @@ def main():
     ea = C[C.year != "2026"].assign(age=pd.to_numeric(C.VEK, errors="coerce"), e=C.MANDAT == "A").dropna(subset=["age"])
     ea["b"] = pd.cut(ea.age, [18, 30, 40, 50, 60, 70, 200], right=False, labels=["18–29", "30–39", "40–49", "50–59", "60–69", "70+"])
     stats["elected_age"] = [[str(b), int(g.e.sum()), len(g)] for b, g in ea.groupby("b", observed=True)]
+    # "nejzajímavější povolání": hand-picked, kind, no names; each linked to the council it was written in
+    FUN = ["psychiatr, sexuolog, stenograf, umělecká plavkyně, freediver, kočkomil", "vysokoškolský pedagog, kovboj",
+           "lektor socioniky, volnočasový pedagog, kouzelník", "mistr ve výrobě, fotograf, amatérský lovec bouřek",
+           "lovec finančních podvodníků, zastupitel, dobrovolný hasič", "stavební inženýr, kominík, energetický poradce, trenér rugby",
+           "herec, zpěvák a performer, zdravotní klaun", "právník univerzity palackého, domácí pivovarník, speedpuzzler",
+           "výroba jurt, člen spolku historického šermu Rytíři Mělničtí, youtuber Houbař Jakub",
+           "softwarový architekt, instruktor windsurfingu", "servisní technik antén a sládek", "sládek pivovaru Psychovar",
+           "jaderný fyzik, léčitel, podnikatel, člen spolku Obchvat Třebíče", "předseda spolku Respawn z.s., pořadatel airsoftových akcí",
+           "IT nadšenec, zachránce strmilovských chalup, výrobce čipové časomíry, zastánce zdravého rozumu",
+           "pedagožka v ZŠ Zašová, kreativní duše, gamerka", "technický manažer pro vesmír a obranu s přesahem do obchodní činnosti",
+           "administrátor pokusů", "živnostník - VÁHY POKLADNY", "konstruktér, hrobník"]
+    pv = b26.POVOLANI.str.strip().str.lower()
+    fun = []
+    for t in FUN:
+        hit = b26[pv == t.lower()]
+        if len(hit):
+            kod_ = hit.iloc[0].KODZASTUP
+            fun.append([t, council_name.get(kod_, ""), kod_])
+    lo = pv.str.lower()
+    stats["fun_occ"] = fun
+    stats["fun_facts"] = {"maxlen": int((b26.POVOLANI.str.len() >= 190).sum()), "thp": int((pv == "thp").sum()),
+                          "vinar": int(lo.str.contains("vinař").sum()), "vcelar": int(lo.str.contains("včelař").sum()),
+                          "sladek": int(lo.str.contains("sládek").sum()), "kominik": int(lo.str.contains("kominík").sum()),
+                          "kouzelnik": int(lo.str.contains("kouzelník").sum()), "hrobnik": int(lo.str.contains("hrobník").sum()),
+                          "youtuber": int(lo.str.contains("youtuber").sum()), "english": int(lo.str.contains(r"\b(?:manager|engineer|developer|ceo|specialist)\b").sum()),
+                          "penzista": int(lo.str.contains("důchod|penzist").sum())}
     stats["occ"] = json.load(open(ROOT / "data/derived/occ_groups.json", encoding="utf-8"))["rank"]
     stats["big"] = [[k, council_name.get(k, k)] for k in big if (SITE / "obec" / f"{k}.html").exists()]
     home = (ROOT / "src/home_template.html").read_text().replace("__INDEX__", js(index)).replace("__STATS__", js(stats))

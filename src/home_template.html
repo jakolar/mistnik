@@ -69,6 +69,10 @@ section.block { margin-top: 64px; padding-top: 20px; border-top: 2px solid var(-
 .ebar i { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 5px; }
 .ebar b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
 @media (max-width: 480px) { .erow { grid-template-columns: 4.5rem 1fr 4rem; } .erow small { display: none; } }
+.funlist li { align-items: baseline; }
+.funlist li a { text-decoration: none; }
+.funlist li span { text-align: right; }
+.funfacts { margin-top: 24px; }
 .sub3 { font: 600 1rem var(--sans); margin: 28px 0 8px; }
 .ages { position: relative; max-width: 1000px; }
 .ages svg { width: 100%; height: auto; display: block; font: 13px var(--sans); fill: var(--muted); touch-action: pan-y; }
@@ -118,6 +122,14 @@ footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px)
     <div id="eage" class="eage"></div>
     <h3 class="sub3">Podle povolání</h3>
     <div class="three" id="occ"></div>
+  </section>
+
+  <section class="block">
+    <h2>Nejzajímavější povolání</h2>
+    <p class="sub">Co kandidáti letos napsali na kandidátku, přesně jejich slovy. Vybral jsem zápisy, které stojí za přečtení. Jména neuvádím, odkaz vede na stránku obce.</p>
+    <ul class="rows funlist" id="fun"></ul>
+    <div class="nums funfacts" id="funfacts"></div>
+    <p class="note">Zápisy jsou veřejné údaje z kandidátních listin. Limit je 200 znaků.</p>
   </section>
 
   <section class="block">
@@ -237,6 +249,12 @@ document.getElementById("eage").innerHTML = S.elected_age.map(([b, e, n]) => {
   const r = e / n, pc = v => Math.round(v * 100) + " %";
   return `<div class="erow"><span>${b} let</span><span class="ebar" title="${num(e)} zvolených z ${num(n)} kandidatur"><i style="width:${r * 100 / .5}%"></i><b style="left:${O.base * 100 / .5}%"></b></span><span><strong>${pc(r)}</strong> <small>${num(e)} z ${num(n)}</small></span></div>`;
 }).join("") + `<p class="note">Svislá čárka je průměr všech kandidatur (${Math.round(O.base * 100)} %). Počítám kandidatury, jeden člověk se může objevit vícekrát.</p>`;
+document.getElementById("fun").innerHTML = S.fun_occ.map(([t, town, k]) => `<li><a href="obec/${k}.html">${esc(t)}</a><span>${esc(town)}</span></li>`).join("");
+(() => { const f = S.fun_facts;
+  document.getElementById("funfacts").innerHTML = [[f.vinar, "vinařů"], [f.vcelar, "včelařů"], [f.sladek, "sládků"], [f.kominik, "kominíků"],
+    [f.kouzelnik, "kouzelníků"], [f.hrobnik, "hrobníků"], [f.youtuber, "youtuberů"], [f.thp, "kandidátů napsalo jen „THP“"],
+    [f.maxlen, "zápisů dosáhlo limitu 200 znaků"], [f.english, "zápisů obsahuje anglické slovo (manager, engineer…)"], [f.penzista, "důchodců a penzistů"]]
+    .map(([n, l]) => `<div><b>${num(n)}</b><span>${l}</span></div>`).join(""); })();
 const keyed = idx.map(r => [norm(r[1] + " " + r[2]), r]);
 const q = document.getElementById("q"), res = document.getElementById("res"), cnt = document.getElementById("count");
 function show() {
