@@ -125,6 +125,7 @@ document.getElementById("nums").innerHTML = [
   [num(S.councils), "obcí a městských částí"], [num(S.lists), "kandidátek"], [num(S.cands), "kandidátů"],
   [pct(S.women, S.women + S.men), "žen mezi kandidáty"], [pct(S.again, S.cands), "kandidovalo už dříve"],
   [pct(S.inc, S.e22), "zvolených v roce 2022 kandiduje znovu"], [num(S.long), "kandiduje od roku 2010 nebo dřív"],
+  [num(S.stalwarts), `<a href="zvoleni-od-2002.html">zvoleno ve všech volbách od roku 2002</a>`],
 ].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
 // age distribution per election as share of that year's candidates: 2026 highlighted, earlier years in grey
 (() => {

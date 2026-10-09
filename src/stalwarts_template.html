@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Místník – zvoleni ve všech volbách od roku 2002</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --paper: #f5f6f4; --ink: #17202a; --muted: #5a626d; --rule: #d7dad8; --accent: #424b00; --serif: "Literata", Georgia, serif; --sans: "Public Sans", system-ui, sans-serif; }
+@media (prefers-color-scheme: dark) { :root { --paper: #15181d; --ink: #e8eaee; --muted: #9aa1ad; --rule: #2e333b; --accent: #b3c075; } }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.6 var(--serif); }
+main { max-width: 980px; margin: 0 auto; padding: 32px 16px 80px; }
+a { color: var(--accent); }
+.back { font: 600 .95rem var(--sans); }
+h1 { font-size: 2.2rem; line-height: 1.15; margin: 20px 0 8px; }
+h2 { font-size: 1.3rem; margin: 36px 0 8px; }
+p, li { max-width: 66ch; }
+.lead { font-size: 1.15rem; }
+table { border-collapse: collapse; width: 100%; font: .92rem/1.4 var(--sans); }
+th, td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: .8rem; }
+td.n { font-variant-numeric: tabular-nums; }
+td a { color: var(--ink); }
+input { width: 100%; max-width: 480px; font: inherit; font-size: 1rem; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); }
+.cnt { font: .9rem var(--sans); color: var(--muted); margin: 8px 0 16px; }
+@media (max-width: 640px) { .opt { display: none; } }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">← Místník</a>
+  <h1>Zvoleni ve všech volbách od roku 2002</h1>
+  <p class="lead">Lidé, kteří byli do zastupitelstva své obce nebo městské části zvoleni ve všech šesti komunálních volbách od roku 2002 a letos kandidují znovu.</p>
+  <p>„Zvolen“ znamená zvolen ve volbách; nevíme, jestli dotyčný mandát vykonával celé období. Seznam je spíš dolní odhad: zahrnuje jen kandidatury, které jsme s jistotou spojili (<a href="metodika.html">jak to počítáme</a>).</p>
+  <label for="q" style="font:600 .95rem var(--sans);display:block;margin:24px 0 6px">Hledat obec, okres nebo jméno</label>
+  <input id="q" type="search" placeholder="například Olomouc nebo Novák" autocomplete="off">
+  <p class="cnt" id="cnt"></p>
+  <table><thead><tr><th>Jméno</th><th class="opt">Věk</th><th>Obec</th><th class="opt">Okres</th><th class="opt">Kandidátka 2026</th></tr></thead><tbody id="rows"></tbody></table>
+</main>
+<script>
+const D = __DATA__;  // [name, age, town, okres, kod, id, list]
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const keyed = D.map(r => [norm(r[0] + " " + r[2] + " " + r[3]), r]);
+const tb = document.getElementById("rows"), cnt = document.getElementById("cnt"), q = document.getElementById("q");
+function show() {
+  const v = norm(q.value.trim()), hits = keyed.filter(([k]) => !v || k.includes(v)).map(([, r]) => r);
+  cnt.textContent = `${hits.length.toLocaleString("cs-CZ")} ${v ? "nalezených" : "lidí"}` + (hits.length > 500 ? ", zobrazujeme prvních 500, upřesněte hledání" : "");
+  tb.innerHTML = hits.slice(0, 500).map(r => `<tr><td><a href="obec/${r[4]}.html#${encodeURIComponent(r[5])}">${esc(r[0])}</a></td><td class="n opt">${r[1]}</td>
+    <td><a href="obec/${r[4]}.html">${esc(r[2])}</a></td><td class="opt">${esc(r[3])}</td><td class="opt">${esc(r[6])}</td></tr>`).join("");
+}
+q.addEventListener("input", show); show();
+</script>
+</body>
+</html>

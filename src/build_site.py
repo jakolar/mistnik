@@ -78,7 +78,7 @@ def main():
     tpl = (ROOT / "src/obec_template.html").read_text()
     index = []
     stats = {"cands": 0, "lists": 0, "women": 0, "men": 0, "new": 0, "long": 0, "again": 0, "inc": 0, "e22": 0}
-    list_ages, nlists = [], []
+    list_ages, nlists, stalwarts = [], [], []
     for kod, ballot in b26.groupby("KODZASTUP"):
         people = []
         for r in ballot.assign(list_no=ballot.id.str.split(":").str[3].astype(int),
@@ -138,6 +138,10 @@ def main():
         (SITE / "obec" / f"{kod}.html").write_text(page)
         okres = okres_name.get(rz26.at[kod, "OKRES"], "") if kod in rz26.index else ""
         index.append([kod, town, okres, len(people), sum(p["ran"] > 0 for p in people)])
+        for p in people:  # elected in this council in all six elections 2002-2022 and running again
+            past = [h for h in p["history"] if h["year"] != "2026"]
+            if len(past) == 6 and all(h["elected_here"] for h in past):
+                stalwarts.append([p["name"], p["age"], town, okres, kod, p["id"], p["list"]])
         stats["cands"] += len(people)
         stats["lists"] += len({p["list_no"] for p in people})
         sizes = collections.Counter(p["list_no"] for p in people)
@@ -187,6 +191,9 @@ def main():
     stats["age_years"] = [{"y": int(y), "mean": round(float(g.age.mean()), 1),
                            "share": [round(float(x), 5) for x in g.age.astype(int).value_counts(normalize=True).reindex(range(18, 91), fill_value=0)]}
                           for y, g in ay.groupby("year")]
+    stats["stalwarts"] = len(stalwarts)
+    (SITE / "zvoleni-od-2002.html").write_text((ROOT / "src/stalwarts_template.html").read_text()
+                                               .replace("__DATA__", js(sorted(stalwarts, key=lambda r: (r[3], r[2], r[0])))))
     stats["occ"] = json.load(open(ROOT / "data/derived/occ_groups.json", encoding="utf-8"))["rank"]
     stats["big"] = [[k, council_name.get(k, k)] for k in big if (SITE / "obec" / f"{k}.html").exists()]
     home = (ROOT / "src/home_template.html").read_text().replace("__INDEX__", js(index)).replace("__STATS__", js(stats))
@@ -198,7 +205,7 @@ def main():
     export_open_data.main(CONTACT)
     # search engines: robots.txt + sitemap of every page (indexing approved by Jan 2026-10-09)
     base = "https://mistnik.cz"
-    urls = [f"{base}/", f"{base}/povolani", f"{base}/metodika", f"{base}/data"] + [f"{base}/obec/{r[0]}" for r in index]
+    urls = [f"{base}/", f"{base}/povolani", f"{base}/metodika", f"{base}/data", f"{base}/zvoleni-od-2002"] + [f"{base}/obec/{r[0]}" for r in index]
     (SITE / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n")
     (SITE / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {base}/sitemap.xml\n")
