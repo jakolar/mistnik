@@ -16,7 +16,7 @@ Jak se rozhoduje:
 4. **Jazykový model jako rozhodčí.** Sporné páry posuzuje model [Jev](https://openrouter.ai/typesafe/jev-1.13); sám o spojení nerozhoduje, jen potvrzuje případy s vysokým skóre a druhou shodou.
 5. **Skládání osob** s hlídáním tranzitivity: nové spojení musí sedět se všemi dosavadními kandidaturami téhož člověka.
 
-Výsledek: zhruba 749 tisíc osob z 1,45 milionu kandidatur. Nejistá spojení (asi 5 %) se na webu nezobrazují, ale jsou v otevřených datech, aby si je mohl kdokoli zkontrolovat.
+Výsledek: zhruba 749 tisíc osob z 1,45 milionu kandidatur. Nejistá spojení (týkají se asi 4 % letošních kandidátů) se na webu nezobrazují, ale jsou v otevřených datech, aby si je mohl kdokoli zkontrolovat.
 
 Podrobný návrh a jeho kritika: [`docs/parovani-kandidatu-v2.md`](docs/parovani-kandidatu-v2.md).
 
