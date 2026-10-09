@@ -51,6 +51,13 @@ section.block { margin-top: 64px; padding-top: 20px; border-top: 2px solid var(-
 .showmore:hover { background: var(--hover); }
 .leg span { display: inline-block; width: 12px; height: 3px; margin: 0 6px 3px 12px; vertical-align: middle; }
 .leg span:first-child { margin-left: 0; }
+.eage { max-width: 720px; }
+.erow { display: grid; grid-template-columns: 5.5rem 1fr 12.5rem; gap: 12px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--grid); font-size: .92rem; }
+.erow small { color: var(--muted); font-variant-numeric: tabular-nums; }
+.ebar { position: relative; height: 10px; background: var(--grid); border-radius: 5px; }
+.ebar i { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 5px; }
+.ebar b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+@media (max-width: 480px) { .erow { grid-template-columns: 4.5rem 1fr 4rem; } .erow small { display: none; } }
 .sub3 { font: 600 1rem var(--sans); margin: 28px 0 8px; }
 .ages { position: relative; max-width: 1000px; }
 .ages svg { width: 100%; height: auto; display: block; font: 13px var(--sans); fill: var(--muted); touch-action: pan-y; }
@@ -95,6 +102,9 @@ footer { max-width: 1080px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 40px)
   <section class="block">
     <h2>Koho voliči volí</h2>
     <p class="sub" id="occsub"></p>
+    <h3 class="sub3">Podle věku</h3>
+    <div id="eage" class="eage"></div>
+    <h3 class="sub3">Podle povolání</h3>
     <div class="three" id="occ"></div>
   </section>
 
@@ -204,12 +214,17 @@ document.getElementById("facts").innerHTML = `
 
 const O = S.occ, slug = c => "s-" + c.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
 const orow = r => `<li><a href="povolani.html#${slug(r[3])}">${esc(r[0])}</a><span>${Math.round(r[2] * 100)} % zvoleno z ${num(r[1])}</span></li>`;
-document.getElementById("occsub").textContent = `Podíl zvolených podle povolání, které kandidáti uvedli, ve volbách 2002–2022. Průměr všech kandidátů je ${Math.round(O.base * 100)} %.`;
+document.getElementById("occsub").textContent = `Podíl zvolených kandidátů podle věku a podle povolání, které uvedli, ve volbách 2002–2022. Průměr všech kandidátů je ${Math.round(O.base * 100)} %.`;
 document.getElementById("occ").innerHTML = `
   <div><h3>Nejčastěji zvolení</h3>${more(O.top.map(orow))}</div>
   <div><h3>Nejméně často zvolení</h3>${more(O.bottom.map(orow))}</div>
   <p class="note" style="grid-column:1/-1">Jen povolání s aspoň ${num(O.min)} kandidaturami, bez veřejných funkcí jako starosta. Část rozdílů dělá velikost obce: v malých obcích bývá zvolená větší část kandidátů, a tam je víc zemědělců.</p>`;
 
+// share elected by age band: bars with the overall average as a tick
+document.getElementById("eage").innerHTML = S.elected_age.map(([b, e, n]) => {
+  const r = e / n, pc = v => Math.round(v * 100) + " %";
+  return `<div class="erow"><span>${b} let</span><span class="ebar" title="${num(e)} zvolených z ${num(n)} kandidatur"><i style="width:${r * 100 / .5}%"></i><b style="left:${O.base * 100 / .5}%"></b></span><span><strong>${pc(r)}</strong> <small>${num(e)} z ${num(n)}</small></span></div>`;
+}).join("") + `<p class="note">Svislá čárka je průměr všech kandidatur (${Math.round(O.base * 100)} %). Počítáme kandidatury, jeden člověk se může objevit vícekrát.</p>`;
 const keyed = idx.map(r => [norm(r[1] + " " + r[2]), r]);
 const q = document.getElementById("q"), res = document.getElementById("res"), cnt = document.getElementById("count");
 function show() {

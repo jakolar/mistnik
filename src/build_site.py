@@ -207,6 +207,10 @@ def main():
          "Lidé, kteří kandidovali ve všech šesti komunálních volbách od roku 2002 a letos kandidují posedmé. Dřívější kandidatury mohly být i v jiné obci.")):
         (SITE / fname).write_text(people_tpl.replace("__TITLE__", title).replace("__LEAD__", lead)
                                   .replace("__DATA__", js(sorted(rows, key=lambda r: (r[3], r[2], r[0])))))
+    # share elected by age band, elections 2002-2022 (2026 not decided yet)
+    ea = C[C.year != "2026"].assign(age=pd.to_numeric(C.VEK, errors="coerce"), e=C.MANDAT == "A").dropna(subset=["age"])
+    ea["b"] = pd.cut(ea.age, [18, 30, 40, 50, 60, 70, 200], right=False, labels=["18–29", "30–39", "40–49", "50–59", "60–69", "70+"])
+    stats["elected_age"] = [[str(b), int(g.e.sum()), len(g)] for b, g in ea.groupby("b", observed=True)]
     stats["occ"] = json.load(open(ROOT / "data/derived/occ_groups.json", encoding="utf-8"))["rank"]
     stats["big"] = [[k, council_name.get(k, k)] for k in big if (SITE / "obec" / f"{k}.html").exists()]
     home = (ROOT / "src/home_template.html").read_text().replace("__INDEX__", js(index)).replace("__STATS__", js(stats))
